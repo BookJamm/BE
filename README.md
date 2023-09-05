@@ -6,8 +6,9 @@
 </div>
 
 <div align="center">
-<img alt="GitHub issues" src="https://img.shields.io/github/issues/bookjamm/BE?style=flat-square">
-<img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/bookjamm/be?style=flat-square&label=PRs">
+<img alt="GitHub issues" src="https://img.shields.io/github/issues/bookjamm/BE?">
+<img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/bookjamm/be?&label=PRs">
+<img alt="GitHub commit activity (branch)" src="https://img.shields.io/github/commit-activity/w/bookjamm/be?">
 </div>
 
 # Members 😎
