@@ -1,25 +1,36 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { LoggerModule } from 'nestjs-pino';
+import { AuthModule } from './auth/auth.module';
+import dbConfig from './global/config/db.config';
+import jwtConfig from './global/config/jwt.config';
+import { TypeOrmConfigService } from './global/config/typeorm-config.service';
+import { LoggerMiddleware } from './global/log.middleware';
+import { PlacesModule } from './places/places.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
-    LoggerModule.forRoot({
-      pinoHttp: {
-        customProps: (req, res) => ({
-          context: 'HTTP',
-        }),
-        transport: {
-          target: 'pino-pretty',
-          options: {
-            singleLine: true,
-          },
-        },
-      },
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [dbConfig, jwtConfig],
+      envFilePath: ['.env'],
     }),
+    TypeOrmModule.forRootAsync({
+      useClass: TypeOrmConfigService,
+      dataSourceFactory: async (options: DataSourceOptions) => new DataSource(options).initialize(),
+    }),
+    AuthModule,
+    UsersModule,
+    PlacesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
