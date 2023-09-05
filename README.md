@@ -1,13 +1,13 @@
 <h1 align="center">BookJam Backend</h1>
 <div align="center">
-
 <img alt="Static Badge" src="https://img.shields.io/badge/Typescript-3178C6?style=flat-square&logo=typescript&logoColor=white">
 <img alt="Static Badge" src="https://img.shields.io/badge/Nest-E0234E?style=flat-square&logo=nestjs&logoColor=white">
 <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=MySQL&logoColor=white"/>
+</div>
 
+<div align="center">
 <img alt="GitHub issues" src="https://img.shields.io/github/issues/bookjamm/BE?style=flat-square">
 <img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/bookjamm/be?style=flat-square&label=PRs">
-
 </div>
 
 # Members 😎
