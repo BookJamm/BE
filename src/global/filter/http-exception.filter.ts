@@ -1,4 +1,4 @@
-import { ArgumentsHost, Catch, ExceptionFilter, Logger } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, Logger, NotFoundException } from '@nestjs/common';
 import { Response } from 'express';
 import { TypeORMError } from 'typeorm';
 import { BaseException } from '../base/base-exception';
@@ -34,6 +34,19 @@ export class DatabaseExceptionFilter implements ExceptionFilter {
 
     this.logger.error(exception.message, exception.stack);
     response.status(status).json(new ErrorResponse(code, message));
+  }
+}
+
+@Catch(NotFoundException)
+export class NoHandlerFoundExceptionFilter implements ExceptionFilter {
+  catch(exception: NotFoundException, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+
+    const code = GlobalResponseCode.NOT_SUPPORTED_URI_ERROR;
+    const status = code.getStatus();
+
+    response.status(status).json(new ErrorResponse(code));
   }
 }
 

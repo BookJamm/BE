@@ -8,6 +8,7 @@ import {
   AnyErrorExceptionFilter,
   BaseExceptionFilter,
   DatabaseExceptionFilter,
+  NoHandlerFoundExceptionFilter,
 } from './global/filter/http-exception.filter';
 import { setupSwagger } from './swagger';
 
@@ -74,6 +75,7 @@ async function bootstrap() {
   app.useGlobalFilters(
     new AnyErrorExceptionFilter(), // 3rd
     new DatabaseExceptionFilter(), // 2nd
+    new NoHandlerFoundExceptionFilter(),
     new BaseExceptionFilter(), // 1st
   );
 
