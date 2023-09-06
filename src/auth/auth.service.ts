@@ -30,6 +30,7 @@ export class AuthService {
     }
 
     const secret = this.configService.get('auth.secret', { infer: true });
+
     const accessTokenValidity = this.configService.get('auth.accessTokenValidity', { infer: true });
     const refreshTokenValidity = this.configService.get('auth.refreshTokenValidity', {
       infer: true,

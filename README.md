@@ -15,7 +15,7 @@
 
 | <img width="200px" src="https://avatars.githubusercontent.com/u/76639211?v=4"/> | <img width="200px" src="https://avatars.githubusercontent.com/u/52905679?v=4"/> |
 | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| [해리/천현우](https://github.com/eomgerm)                                       | [보노/엄기훈](https://github.com/eomgerm)                                       |
+| [해리/천현우](https://github.com/eomgerm)                                       | [보노/엄기훈](https://github.com/eomgerm)}                                      |
 
 # Commit Conventions
 
