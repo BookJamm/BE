@@ -14,7 +14,7 @@ import { AuthResponseCode } from './exception/auth-respone-code';
 describe('AuthService 테스트', () => {
   let authService: AuthService;
   let jwtService: JwtService;
-  const userRepositoryToken: string | Function = getRepositoryToken(User);
+  const userRepositoryToken = getRepositoryToken(User);
   const ALEX = {
     email: 'alex@naver.com',
     password: 'password',

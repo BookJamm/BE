@@ -8,7 +8,7 @@ let newUser: User;
 
 describe('UsersService 테스트', () => {
   let usersService: UsersService;
-  const userRepositoryToken: string | Function = getRepositoryToken(User);
+  const userRepositoryToken = getRepositoryToken(User);
 
   beforeEach(async () => {
     newUser = new User('alex@naver.com', await Password.encrpyt('password'), 'alex');

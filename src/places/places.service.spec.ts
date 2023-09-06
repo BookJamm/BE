@@ -9,8 +9,7 @@ import { PlacesService } from './places.service';
 
 describe('PlacesService 테스트', () => {
   let placesService: PlacesService;
-  let placeRepository: PlaceRepository;
-  const placeRepositoryToken: string | Function = getRepositoryToken(Place);
+  const placeRepositoryToken = getRepositoryToken(Place);
   const places = [
     PlaceFixture.PLACE_1,
     PlaceFixture.PLACE_2,
@@ -47,7 +46,6 @@ describe('PlacesService 테스트', () => {
     }).compile();
 
     placesService = module.get<PlacesService>(PlacesService);
-    placeRepository = module.get<PlaceRepository>(PlaceRepository);
   });
 
   it('should be defined', () => {
