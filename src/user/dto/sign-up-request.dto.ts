@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
-import { Password } from '../entities/password';
-import { User } from '../entities/user.entity';
+import { Password } from '../entity/password';
+import { User } from '../entity/user.entity';
 
 export class SignUpRequest {
   @ApiProperty({

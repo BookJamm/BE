@@ -1,7 +1,5 @@
 import { BaseEntity } from 'src/global/base/base.entity';
-import {
- Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn 
-} from 'typeorm';
+import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { Password } from './password';
 
 @Entity('users')

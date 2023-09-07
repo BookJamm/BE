@@ -1,18 +1,26 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { BaseResponse } from 'src/global/base/base-response';
+import { GlobalResponseCode } from 'src/global/base/global-respose-code';
+import { ExtractPayload } from 'src/global/decorator/extract-payload.decorator';
+import { ReviewService } from 'src/review/review.service';
+import { CreateReviewRequest } from './dto/create-review-request.dto';
+import { CreateReviewResponse } from './dto/create-review-response.dto';
 import { PlaceListResponse } from './dto/place-list-response.dto';
-import { PlacesService } from './places.service';
+import { PlaceService } from './place.service';
 
 @Controller('api/places')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
-export class PlacesController {
-  constructor(private readonly placesService: PlacesService) {}
+export class PlaceController {
+  constructor(
+    private readonly placesService: PlaceService,
+    private readonly reviewsService: ReviewService,
+  ) {}
 
   @Get()
-  @ApiTags('places', '보노')
+  @ApiTags('places')
   @ApiOperation({ description: '카테고리 별 장소를 불러온다.' })
   @ApiOkResponse({ type: [PlaceListResponse] })
   @ApiQuery({
@@ -57,8 +65,16 @@ export class PlacesController {
     );
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.placesService.findOne(+id);
+  @Post(':placeId/reviews')
+  @UseGuards(JwtAuthGuard)
+  async createReview(
+    @ExtractPayload() author: number,
+    @Param('placeId') placeId: number,
+    @Body() reqeust: CreateReviewRequest,
+  ): Promise<BaseResponse<CreateReviewResponse>> {
+    return new BaseResponse(
+      await this.reviewsService.create(author, placeId, reqeust),
+      GlobalResponseCode.CREATED,
+    );
   }
 }

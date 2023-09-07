@@ -2,13 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BaseException } from 'src/global/base/base-exception';
 import { PlaceFixture } from '../../test/fixtures/place-fixture';
-import { Place } from './entities/place.entity';
-import { PlaceRepository } from './entities/place.repository';
+import { Place } from './entity/place.entity';
+import { PlaceRepository } from './entity/place.repository';
 import { PlaceResponseCode } from './exception/place-response-code';
-import { PlacesService } from './places.service';
+import { PlaceService } from './place.service';
 
-describe('PlacesService 테스트', () => {
-  let placesService: PlacesService;
+describe('PlaceService 테스트', () => {
+  let placeService: PlaceService;
   const placeRepositoryToken = getRepositoryToken(Place);
   const places = [
     PlaceFixture.PLACE_1,
@@ -34,7 +34,7 @@ describe('PlacesService 테스트', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        PlacesService,
+        PlaceService,
         {
           provide: PlaceRepository,
           useValue: {
@@ -45,11 +45,11 @@ describe('PlacesService 테스트', () => {
       ],
     }).compile();
 
-    placesService = module.get<PlacesService>(PlacesService);
+    placeService = module.get<PlaceService>(PlaceService);
   });
 
   it('should be defined', () => {
-    expect(placesService).toBeDefined();
+    expect(placeService).toBeDefined();
   });
 
   describe('카테고리 별 장소 조회', () => {
@@ -59,7 +59,7 @@ describe('PlacesService 테스트', () => {
 
       // then
       expect(
-        await placesService.findByCategory(CATEGORY, SORT_CONDITION, LAT, LON, undefined),
+        await placeService.findByCategory(CATEGORY, SORT_CONDITION, LAT, LON, undefined),
       ).toStrictEqual(expectedResult);
     });
 
@@ -68,7 +68,7 @@ describe('PlacesService 테스트', () => {
       const expectedError = BaseException.of(PlaceResponseCode.INVALID_CATEGORY);
 
       await expect(
-        placesService.findByCategory(INVALID_CATEGORY, SORT_CONDITION, LAT, LON, undefined),
+        placeService.findByCategory(INVALID_CATEGORY, SORT_CONDITION, LAT, LON, undefined),
       ).rejects.toThrowError(expectedError);
     });
 
@@ -77,7 +77,7 @@ describe('PlacesService 테스트', () => {
       const expectedError = BaseException.of(PlaceResponseCode.INVALID_SORT_CONDITION);
 
       await expect(
-        placesService.findByCategory(CATEGORY, INVALID_SORT_CONDITION, LAT, LON, undefined),
+        placeService.findByCategory(CATEGORY, INVALID_SORT_CONDITION, LAT, LON, undefined),
       ).rejects.toThrowError(expectedError);
     });
 
@@ -85,7 +85,7 @@ describe('PlacesService 테스트', () => {
       const expectedError = BaseException.of(PlaceResponseCode.INVALID_LOCATION);
 
       await expect(
-        placesService.findByCategory(CATEGORY, SORT_CONDITION, INVALID_LAT, INVALID_LON, undefined),
+        placeService.findByCategory(CATEGORY, SORT_CONDITION, INVALID_LAT, INVALID_LON, undefined),
       ).rejects.toThrowError(expectedError);
     });
   });

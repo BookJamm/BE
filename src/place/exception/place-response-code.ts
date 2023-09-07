@@ -17,4 +17,9 @@ export const PlaceResponseCode = {
     'PLACE_003',
     '위치가 유효하지 않습니다.',
   ),
+  PLACE_NOT_FOUND: new ResponseCode(
+    HttpStatus.NOT_FOUND,
+    'PLACE_004',
+    '해당 장소가 존재하지 않습니다.',
+  ),
 };

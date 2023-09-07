@@ -2,18 +2,18 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BaseResponse } from 'src/global/base/base-response';
 import { GlobalResponseCode } from 'src/global/base/global-respose-code';
 import { SignUpRequest } from './dto/sign-up-request.dto';
-import { UsersController } from './users.controller';
-import { UsersService } from './users.service';
+import { UserController } from './user.controller';
+import { UserService } from './user.service';
 
-describe('UsersController 테스트', () => {
-  let usersController: UsersController;
+describe('UserController 테스트', () => {
+  let userController: UserController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [UsersController],
+      controllers: [UserController],
       providers: [
         {
-          provide: UsersService,
+          provide: UserService,
           useValue: {
             createUser: jest.fn().mockResolvedValue(1),
           },
@@ -21,18 +21,18 @@ describe('UsersController 테스트', () => {
       ],
     }).compile();
 
-    usersController = module.get<UsersController>(UsersController);
+    userController = module.get<UserController>(UserController);
   });
 
   it('should be defined', () => {
-    expect(usersController).toBeDefined();
+    expect(userController).toBeDefined();
   });
 
   describe('signUp 테스트 [POST /api/users/sign-up]', () => {
     it('회원 가입 성공', async () => {
       const request = createSignUpRequest();
       const expectedResult = new BaseResponse({ userId: 1 }, GlobalResponseCode.CREATED);
-      expect(await usersController.signUp(request)).toStrictEqual(expectedResult);
+      expect(await userController.signUp(request)).toStrictEqual(expectedResult);
     });
   });
 

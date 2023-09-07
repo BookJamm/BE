@@ -8,8 +8,9 @@ import dbConfig from './global/config/db.config';
 import jwtConfig from './global/config/jwt.config';
 import { TypeOrmConfigService } from './global/config/typeorm-config.service';
 import { LoggerMiddleware } from './global/log.middleware';
-import { PlacesModule } from './places/places.module';
-import { UsersModule } from './users/users.module';
+import { PlaceModule } from './place/place.module';
+import { ReviewModule } from './review/review.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -23,8 +24,9 @@ import { UsersModule } from './users/users.module';
       dataSourceFactory: async (options: DataSourceOptions) => new DataSource(options).initialize(),
     }),
     AuthModule,
-    UsersModule,
-    PlacesModule,
+    UserModule,
+    PlaceModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [],

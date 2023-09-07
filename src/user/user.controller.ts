@@ -4,12 +4,12 @@ import { BaseResponse } from 'src/global/base/base-response';
 import { GlobalResponseCode } from 'src/global/base/global-respose-code';
 import { SignUpRequest } from './dto/sign-up-request.dto';
 import { SignUpResponse } from './dto/sign-up-response.dto';
-import { UsersService } from './users.service';
+import { UserService } from './user.service';
 
 @Controller('api/users')
 @ApiTags('users')
-export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+export class UserController {
+  constructor(private readonly usersService: UserService) {}
 
   @Post('sign-up')
   @ApiCreatedResponse({

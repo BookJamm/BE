@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { BaseException } from 'src/global/base/base-exception';
-import { PlaceRepository } from './entities/place.repository';
-import { SortConditon } from './entities/sort-conditon';
+import { PlaceRepository } from './entity/place.repository';
+import { SortConditon } from './entity/sort-conditon';
 import { PlaceResponseCode } from './exception/place-response-code';
 
 @Injectable()
-export class PlacesService {
+export class PlaceService {
   private readonly PLACE_CATEGORY = [0, 1, 2];
 
   constructor(private readonly placeRepository: PlaceRepository) {}
@@ -39,9 +39,5 @@ export class PlacesService {
     if (!(validLat && validLon)) {
       throw BaseException.of(PlaceResponseCode.INVALID_LOCATION);
     }
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} place`;
   }
 }
