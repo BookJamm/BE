@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BaseException } from 'src/global/base/base-exception';
 import { BaseResponse } from 'src/global/base/base-response';
-import { PlaceFixture } from '../../test/fixtures/place-fixture';
+import { ReviewService } from 'src/review/review.service';
+import { PlaceFixture } from '../../test/fixture/place-fixture';
 import { PlaceListResponse } from './dto/place-list-response.dto';
 import { PlaceResponseCode } from './exception/place-response-code';
 import { PlaceController } from './place.controller';
@@ -34,12 +35,19 @@ describe('PlaceController 테스트', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [],
       controllers: [PlaceController],
       providers: [
         {
           provide: PlaceService,
           useValue: {
             findByCategory: jest.fn().mockResolvedValue(places),
+          },
+        },
+        {
+          provide: ReviewService,
+          useValue: {
+            create: jest.fn(),
           },
         },
       ],

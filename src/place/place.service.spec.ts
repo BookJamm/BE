@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BaseException } from 'src/global/base/base-exception';
-import { PlaceFixture } from '../../test/fixtures/place-fixture';
+import { PlaceFixture } from '../../test/fixture/place-fixture';
 import { Place } from './entity/place.entity';
 import { PlaceRepository } from './entity/place.repository';
 import { PlaceResponseCode } from './exception/place-response-code';

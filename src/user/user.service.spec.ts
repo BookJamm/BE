@@ -2,12 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Password } from './entity/password';
 import { User } from './entity/user.entity';
-import { UsersService } from './user.service';
+import { UserService } from './user.service';
 
 let newUser: User;
 
-describe('UsersService 테스트', () => {
-  let usersService: UsersService;
+describe('UserService 테스트', () => {
+  let userService: UserService;
   const userRepositoryToken = getRepositoryToken(User);
 
   beforeEach(async () => {
@@ -15,7 +15,7 @@ describe('UsersService 테스트', () => {
     newUser.userId = 1;
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        UsersService,
+        UserService,
         {
           provide: userRepositoryToken,
           useValue: {
@@ -25,16 +25,16 @@ describe('UsersService 테스트', () => {
       ],
     }).compile();
 
-    usersService = module.get<UsersService>(UsersService);
+    userService = module.get<UserService>(UserService);
   });
 
   it('should be defined', () => {
-    expect(usersService).toBeDefined();
+    expect(userService).toBeDefined();
   });
 
   describe('signUp 테스트', () => {
     it('회원 가입에 성공', async () => {
-      const newUserId = await usersService.createUser(newUser);
+      const newUserId = await userService.createUser(newUser);
       expect(newUserId).toEqual(1);
     });
   });
