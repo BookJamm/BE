@@ -1,15 +1,18 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PlaceModule } from 'src/place/place.module';
-import { UserModule } from 'src/user/user.module';
+import { S3Service } from 'src/aws/s3/s3.service';
+import { Place } from 'src/place/entity/place.entity';
+import { User } from 'src/user/entity/user.entity';
+import { ReviewImage } from './entity/review-image.entity';
 import { Review } from './entity/review.entity';
+import { ReviewRepository } from './entity/review.repository';
 import { ReviewController } from './review.controller';
 import { ReviewService } from './review.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Review]), forwardRef(() => PlaceModule), UserModule],
+  imports: [TypeOrmModule.forFeature([Review, ReviewImage, User, Place])],
   controllers: [ReviewController],
-  providers: [ReviewService],
+  providers: [ReviewService, S3Service, ReviewRepository],
   exports: [ReviewService],
 })
 export class ReviewModule {}

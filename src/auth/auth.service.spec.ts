@@ -8,7 +8,7 @@ import { Password } from 'src/user/entity/password';
 import { User } from 'src/user/entity/user.entity';
 import { Repository } from 'typeorm';
 import { AuthService } from './auth.service';
-import { LoginResponse } from './dto/login-response.dto';
+import { LoginResponse } from './dto/jwt-response.dto';
 import { AuthResponseCode } from './exception/auth-respone-code';
 
 describe('AuthService 테스트', () => {

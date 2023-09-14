@@ -15,7 +15,7 @@ describe('UserController 테스트', () => {
         {
           provide: UserService,
           useValue: {
-            createUser: jest.fn().mockResolvedValue(1),
+            create: jest.fn().mockResolvedValue(1),
           },
         },
       ],

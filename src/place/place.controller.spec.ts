@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BaseException } from 'src/global/base/base-exception';
 import { BaseResponse } from 'src/global/base/base-response';
-import { PlaceFixture } from '../../test/fixtures/place-fixture';
+import { ReviewService } from 'src/review/review.service';
+import { PlaceFixture } from '../../test/fixture/place-fixture';
 import { PlaceListResponse } from './dto/place-list-response.dto';
 import { PlaceResponseCode } from './exception/place-response-code';
 import { PlaceController } from './place.controller';
@@ -34,12 +35,19 @@ describe('PlaceController 테스트', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [],
       controllers: [PlaceController],
       providers: [
         {
           provide: PlaceService,
           useValue: {
-            findByCategory: jest.fn().mockResolvedValue(places),
+            findPlacesByCategory: jest.fn().mockResolvedValue(places),
+          },
+        },
+        {
+          provide: ReviewService,
+          useValue: {
+            create: jest.fn(),
           },
         },
       ],
@@ -60,14 +68,14 @@ describe('PlaceController 테스트', () => {
 
       // then
       expect(
-        await placeController.findByCategory(CATEGORY, SORT_CONDITION, LAT, LON, undefined),
+        await placeController.findPlacesByCategory(CATEGORY, SORT_CONDITION, LAT, LON, undefined),
       ).toStrictEqual(expectedResult);
     });
 
     it('category가 유효하지 않으면 실패', async () => {
       //given
       jest
-        .spyOn(placeService, 'findByCategory')
+        .spyOn(placeService, 'findPlacesByCategory')
         .mockRejectedValue(BaseException.of(PlaceResponseCode.INVALID_CATEGORY));
 
       //when
@@ -75,14 +83,14 @@ describe('PlaceController 테스트', () => {
 
       //then
       await expect(
-        placeController.findByCategory(INVALID_CATEGORY, SORT_CONDITION, LAT, LON, undefined),
+        placeController.findPlacesByCategory(INVALID_CATEGORY, SORT_CONDITION, LAT, LON, undefined),
       ).rejects.toThrowError(expectedError);
     });
 
     it('sortBy가 유효하지 않으면 실패', async () => {
       //given
       jest
-        .spyOn(placeService, 'findByCategory')
+        .spyOn(placeService, 'findPlacesByCategory')
         .mockRejectedValue(BaseException.of(PlaceResponseCode.INVALID_SORT_CONDITION));
 
       //when
@@ -90,14 +98,14 @@ describe('PlaceController 테스트', () => {
 
       // then
       await expect(
-        placeController.findByCategory(CATEGORY, INVALID_SORT_CONDITION, LAT, LON, undefined),
+        placeController.findPlacesByCategory(CATEGORY, INVALID_SORT_CONDITION, LAT, LON, undefined),
       ).rejects.toThrowError(expectedError);
     });
 
     it('현재 위치 좌표가 유효하지 않으면 실패', async () => {
       //given
       jest
-        .spyOn(placeService, 'findByCategory')
+        .spyOn(placeService, 'findPlacesByCategory')
         .mockRejectedValue(BaseException.of(PlaceResponseCode.INVALID_LOCATION));
 
       //when
@@ -105,7 +113,7 @@ describe('PlaceController 테스트', () => {
 
       //then
       await expect(
-        placeController.findByCategory(
+        placeController.findPlacesByCategory(
           CATEGORY,
           SORT_CONDITION,
           INVALID_LAT,
