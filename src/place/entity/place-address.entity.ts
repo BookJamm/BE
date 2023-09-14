@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'ty
 import { Place } from './place.entity';
 
 @Entity('place_address')
-export class Address {
+export class PlaceAddress {
   @PrimaryGeneratedColumn()
   id: number;
 

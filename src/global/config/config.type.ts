@@ -13,6 +13,12 @@ export type AuthConfig = {
   refreshTokenValidity: string;
 };
 
+export type S3Config = {
+  accessKey: string;
+  secretAccessKey: string;
+  bucket: string;
+};
+
 export type Config = {
   db: DatabaseConfig;
   auth: AuthConfig;

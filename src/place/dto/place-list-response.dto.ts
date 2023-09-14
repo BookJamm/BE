@@ -1,8 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type, plainToInstance } from 'class-transformer';
+import { ImageResponse } from 'src/global/dto/image.dto';
 
 export type RawPlace = {
   placeId: string;
+  category: number;
   name: string;
   rating: number;
   reviewCount: string;
@@ -13,59 +15,75 @@ export type RawPlace = {
   lon: string;
 };
 
-class Address {
+export class AddressResponse {
   @ApiProperty({
     description: '도로명 주소',
     example: '경기 수원시 영통구 영통로174번길 79 1층 서른책방',
     nullable: true,
   })
-  readonly road: string | null;
+  road: string | null;
 
   @ApiProperty({
     description: '지번 주소',
     example: '망포동 345-15',
     nullable: true,
   })
-  readonly jibun: string | null;
+  jibun: string | null;
 }
 
-class Coords {
+export class Coords {
   @ApiProperty({
     description: '위도',
     example: 37.243771,
   })
-  readonly lat: number;
+  lat: number;
 
   @ApiProperty({
     description: '경도',
     example: 127.059794,
   })
-  readonly lon: number;
+  lon: number;
 }
 
 export class PlaceListResponse {
   @ApiProperty({ description: '장소 아이디', example: 1 })
   @Type(() => Number)
-  readonly placeId: number;
+  placeId: number;
+
+  @ApiProperty({ description: '카테고리, [0: 독립 서점 | 1: 책 놀이터 | 2: 도서관]', example: 1 })
+  category: number;
 
   @ApiProperty({ description: '상호명', example: '서른책방' })
-  readonly name: string;
+  name: string;
 
   @ApiProperty({ description: '평점', example: 3.12 })
-  readonly rating: number;
+  rating: number;
 
   @ApiProperty({ description: '리뷰 개수', example: 32 })
   @Type(() => Number)
-  readonly reviewCount: number;
+  reviewCount: number;
 
   @ApiProperty({ description: '현재 위치로부터 거리 (단위: km)', example: 1.02 })
-  readonly distance: number;
+  distance: number;
+
+  @ApiProperty({
+    description: '영업 여부, 영업 여부를 알 수 없을 경우 null',
+    example: true,
+    nullable: true,
+  })
+  open: boolean;
 
   @ApiProperty({ description: '주소' })
-  readonly address: Address;
+  @Type(() => AddressResponse)
+  address: AddressResponse;
 
   @ApiProperty({ description: '좌표' })
-  readonly coords: Coords;
+  @Type(() => Coords)
+  coords: Coords;
+
+  @ApiProperty({ description: '장소 이미지', type: [ImageResponse] })
+  @Type(() => ImageResponse)
+  images: ImageResponse[];
 
   public static from(raw: RawPlace): PlaceListResponse {
     const { road, jibun, lat, lon, ...rest } = raw;

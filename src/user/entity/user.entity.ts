@@ -1,5 +1,8 @@
 import { BaseEntity } from 'src/global/base/base.entity';
-import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { PlaceBookmark } from 'src/place/entity/place-bookmark.entity';
+import { Review } from 'src/review/entity/review.entity';
+import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Follow } from './follow.entity';
 import { Password } from './password';
 
 @Entity('users')
@@ -24,6 +27,18 @@ export class User extends BaseEntity {
 
   @Column()
   refreshToken: string;
+
+  @OneToMany(() => Review, review => review.author)
+  review: Review;
+
+  @OneToMany(() => Follow, follow => follow.follower)
+  followings: Follow[];
+
+  @OneToMany(() => Follow, follow => follow.followee)
+  followers: Follow[];
+
+  @OneToMany(() => PlaceBookmark, bookmark => bookmark.bookmarker)
+  bookmarks: PlaceBookmark[];
 
   constructor(email: string, password: Password, username: string) {
     super();

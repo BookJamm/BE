@@ -1,30 +1,33 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { S3Service } from 'src/aws/s3/s3.service';
 import { BaseException } from 'src/global/base/base-exception';
 import { Place } from 'src/place/entity/place.entity';
 import { PlaceResponseCode } from 'src/place/exception/place-response-code';
-import { PlaceFindService } from 'src/place/place-find.service';
 import { Password } from 'src/user/entity/password';
 import { User } from 'src/user/entity/user.entity';
 import { UserResponseCode } from 'src/user/exception/user-response-code';
-import { UserFindService } from 'src/user/user-find.service';
-import { Review } from './entity/review.entity';
+import { Repository } from 'typeorm';
+import { ReviewImage } from './entity/review-image.entity';
+import { ReviewRepository } from './entity/review.repository';
 import { ReviewService } from './review.service';
 
 describe('ReviewService 테스트', () => {
   let reviewService: ReviewService;
-  let userFindService: UserFindService;
-  let placeFindService: PlaceFindService;
-  const reviewRepositoryToken = getRepositoryToken(Review);
+  let userRepository: Repository<User>;
+  let placeRepository: Repository<Place>;
+  const reviewImageRepositoryToken = getRepositoryToken(ReviewImage);
+  const userRepositoryToken = getRepositoryToken(User);
+  const placeRepositoryToken = getRepositoryToken(Place);
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ReviewService,
         {
-          provide: UserFindService,
+          provide: userRepositoryToken,
           useValue: {
-            findById: jest
+            findOneBy: jest
               .fn()
               .mockResolvedValue(
                 User.createUser('email', await Password.encrpyt('password'), 'alex'),
@@ -32,21 +35,33 @@ describe('ReviewService 테스트', () => {
           },
         },
         {
-          provide: PlaceFindService,
-          useValue: { findById: jest.fn().mockResolvedValue(new Place()) },
+          provide: placeRepositoryToken,
+          useValue: { findOneBy: jest.fn().mockResolvedValue(new Place()) },
         },
         {
-          provide: reviewRepositoryToken,
+          provide: ReviewRepository,
           useValue: {
             save: jest.fn().mockResolvedValue({ reviewId: 1 }),
+          },
+        },
+        {
+          provide: reviewImageRepositoryToken,
+          useValue: {
+            save: jest.fn(),
+          },
+        },
+        {
+          provide: S3Service,
+          useValue: {
+            uploadFile: jest.fn().mockResolvedValue('amazon-s3-url'),
           },
         },
       ],
     }).compile();
 
     reviewService = module.get<ReviewService>(ReviewService);
-    userFindService = module.get<UserFindService>(UserFindService);
-    placeFindService = module.get<PlaceFindService>(PlaceFindService);
+    userRepository = module.get<Repository<User>>(userRepositoryToken);
+    placeRepository = module.get<Repository<Place>>(placeRepositoryToken);
   });
 
   it('should be defined', () => {
@@ -55,24 +70,30 @@ describe('ReviewService 테스트', () => {
 
   describe('리뷰 등록: create', () => {
     it('해당하는 유저가 존재하지 않으면 실패', async () => {
-      jest
-        .spyOn(userFindService, 'findById')
-        .mockRejectedValue(BaseException.of(UserResponseCode.USER_NOT_FOUND));
+      jest.spyOn(userRepository, 'findOneBy').mockResolvedValue(null);
 
       const expectedError = BaseException.of(UserResponseCode.USER_NOT_FOUND);
       await expect(
-        reviewService.create(1, 1, { visitedAt: new Date(), rating: 4, contents: 'Contents' }),
+        reviewService.create(
+          1,
+          1,
+          { visitedAt: new Date(), rating: 4, contents: 'Contents' },
+          undefined,
+        ),
       ).rejects.toThrowError(expectedError);
     });
 
     it('해당하는 장소가 존재하지 않으면 실패', async () => {
-      jest
-        .spyOn(placeFindService, 'findById')
-        .mockRejectedValue(BaseException.of(PlaceResponseCode.PLACE_NOT_FOUND));
+      jest.spyOn(placeRepository, 'findOneBy').mockResolvedValue(null);
 
       const expectedError = BaseException.of(PlaceResponseCode.PLACE_NOT_FOUND);
       await expect(
-        reviewService.create(1, 1, { visitedAt: new Date(), rating: 4, contents: 'Contents' }),
+        reviewService.create(
+          1,
+          1,
+          { visitedAt: new Date(), rating: 4, contents: 'Contents' },
+          undefined,
+        ),
       ).rejects.toThrowError(expectedError);
     });
 
@@ -80,11 +101,16 @@ describe('ReviewService 테스트', () => {
       const expectedResult = { reviewId: 1 };
 
       expect(
-        await reviewService.create(1, 1, {
-          visitedAt: new Date(),
-          rating: 4,
-          contents: 'Contents',
-        }),
+        await reviewService.create(
+          1,
+          1,
+          {
+            visitedAt: new Date(),
+            rating: 4,
+            contents: 'Contents',
+          },
+          [],
+        ),
       ).toStrictEqual(expectedResult);
     });
   });

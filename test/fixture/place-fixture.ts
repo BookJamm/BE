@@ -1,3 +1,5 @@
+import { PlaceListResponse } from 'src/place/dto/place-list-response.dto';
+
 export const PlaceFixture = {
   PLACE_1: {
     placeId: 1,
@@ -13,7 +15,9 @@ export const PlaceFixture = {
       lat: 12,
       lon: 123,
     },
-  },
+    open: true,
+    images: [],
+  } as PlaceListResponse,
   PLACE_2: {
     placeId: 2,
     name: 'A',
@@ -28,7 +32,9 @@ export const PlaceFixture = {
       lat: 12,
       lon: 123,
     },
-  },
+    open: true,
+    images: [],
+  } as PlaceListResponse,
   PLACE_3: {
     placeId: 3,
     name: 'A',
@@ -43,7 +49,9 @@ export const PlaceFixture = {
       lat: 12,
       lon: 123,
     },
-  },
+    open: true,
+    images: [],
+  } as PlaceListResponse,
   PLACE_4: {
     placeId: 4,
     name: 'A',
@@ -58,7 +66,9 @@ export const PlaceFixture = {
       lat: 12,
       lon: 123,
     },
-  },
+    open: true,
+    images: [],
+  } as PlaceListResponse,
   PLACE_5: {
     placeId: 5,
     name: 'A',
@@ -73,7 +83,9 @@ export const PlaceFixture = {
       lat: 12,
       lon: 123,
     },
-  },
+    open: true,
+    images: [],
+  } as PlaceListResponse,
   PLACE_6: {
     placeId: 6,
     name: 'A',
@@ -88,7 +100,9 @@ export const PlaceFixture = {
       lat: 12,
       lon: 123,
     },
-  },
+    open: true,
+    images: [],
+  } as PlaceListResponse,
   PLACE_7: {
     placeId: 7,
     name: 'A',
@@ -103,7 +117,9 @@ export const PlaceFixture = {
       lat: 12,
       lon: 123,
     },
-  },
+    open: true,
+    images: [],
+  } as PlaceListResponse,
   PLACE_8: {
     placeId: 8,
     name: 'A',
@@ -118,7 +134,9 @@ export const PlaceFixture = {
       lat: 12,
       lon: 123,
     },
-  },
+    open: true,
+    images: [],
+  } as PlaceListResponse,
   PLACE_9: {
     placeId: 9,
     name: 'A',
@@ -133,7 +151,9 @@ export const PlaceFixture = {
       lat: 12,
       lon: 123,
     },
-  },
+    open: true,
+    images: [],
+  } as PlaceListResponse,
   PLACE_10: {
     placeId: 10,
     name: 'A',
@@ -148,5 +168,7 @@ export const PlaceFixture = {
       lat: 12,
       lon: 123,
     },
-  },
+    open: true,
+    images: [],
+  } as PlaceListResponse,
 };

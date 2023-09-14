@@ -1,5 +1,8 @@
-import { BaseEntity, Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Address } from './address.entity';
+import { BaseEntity, Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { PlaceAddress } from './place-address.entity';
+import { PlaceBookmark } from './place-bookmark.entity';
+import { PlaceHour } from './place-hour.entity';
+import { PlaceNews } from './place-news.entity';
 
 @Entity('places')
 export class Place extends BaseEntity {
@@ -33,6 +36,15 @@ export class Place extends BaseEntity {
   @Column()
   bookmarkCount: number;
 
-  @OneToOne(() => Address, address => address.place)
-  address: Address;
+  @OneToOne(() => PlaceAddress, address => address.place)
+  address: PlaceAddress;
+
+  @OneToMany(() => PlaceHour, hour => hour.place)
+  hours: PlaceHour[];
+
+  @OneToMany(() => PlaceBookmark, bookmark => bookmark.place)
+  bookmarks: PlaceBookmark[];
+
+  @OneToMany(() => PlaceNews, news => news.place)
+  news: PlaceNews[];
 }

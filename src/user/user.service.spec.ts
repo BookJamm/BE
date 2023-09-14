@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { Follow } from './entity/follow.entity';
 import { Password } from './entity/password';
 import { User } from './entity/user.entity';
 import { UserService } from './user.service';
@@ -9,6 +10,7 @@ let newUser: User;
 describe('UserService 테스트', () => {
   let userService: UserService;
   const userRepositoryToken = getRepositoryToken(User);
+  const followRepositoryToken = getRepositoryToken(Follow);
 
   beforeEach(async () => {
     newUser = new User('alex@naver.com', await Password.encrpyt('password'), 'alex');
@@ -22,6 +24,10 @@ describe('UserService 테스트', () => {
             save: jest.fn().mockResolvedValue(newUser),
           },
         },
+        {
+          provide: followRepositoryToken,
+          useValue: {},
+        },
       ],
     }).compile();
 
@@ -34,7 +40,7 @@ describe('UserService 테스트', () => {
 
   describe('signUp 테스트', () => {
     it('회원 가입에 성공', async () => {
-      const newUserId = await userService.createUser(newUser);
+      const newUserId = await userService.create(newUser);
       expect(newUserId).toEqual(1);
     });
   });
