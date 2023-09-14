@@ -9,6 +9,7 @@
 <img alt="GitHub issues" src="https://img.shields.io/github/issues/bookjamm/BE?">
 <img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/bookjamm/be?&label=PRs">
 <img alt="GitHub commit activity (branch)" src="https://img.shields.io/github/commit-activity/w/bookjamm/be?">
+<img alt="GitHub Workflow Status (with event)" src="https://img.shields.io/github/actions/workflow/status/bookjamm/BE/ci.yml">
 </div>
 
 # Members 😎
