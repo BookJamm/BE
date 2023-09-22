@@ -1,5 +1,6 @@
 import { Injectable, Logger, LoggerService } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Builder } from 'builder-pattern';
 import { S3Service } from 'src/aws/s3/s3.service';
 import { BaseException } from 'src/global/base/base-exception';
 import { CreateReviewRequest } from 'src/place/dto/create-review-request.dto';
@@ -8,12 +9,12 @@ import { Place } from 'src/place/entity/place.entity';
 import { PlaceResponseCode } from 'src/place/exception/place-response-code';
 import { User } from 'src/user/entity/user.entity';
 import { UserResponseCode } from 'src/user/exception/user-response-code';
-import { Repository } from 'typeorm';
+import { UserService } from 'src/user/user.service';
+import { LessThan, Repository } from 'typeorm';
 import { DeleteReviewResponse } from './dto/delete-review-response.dto';
 import { ReviewListResponse } from './dto/review-list-response.dto';
 import { ReviewImage } from './entity/review-image.entity';
 import { Review } from './entity/review.entity';
-import { ReviewRepository } from './entity/review.repository';
 import { ReviewResponseCode } from './exception/review-response-code';
 
 @Injectable()
@@ -25,10 +26,12 @@ export class ReviewService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Place)
     private readonly placeRepository: Repository<Place>,
-    private readonly reviewRepository: ReviewRepository,
+    @InjectRepository(Review)
+    private readonly reviewRepository: Repository<Review>,
     @InjectRepository(ReviewImage)
     private readonly reviewImageRepository: Repository<ReviewImage>,
     private readonly s3Service: S3Service,
+    private readonly userService: UserService,
   ) {}
   async create(
     authorId: number,
@@ -98,22 +101,40 @@ export class ReviewService {
     return { deleted: true };
   }
 
-  async findPlaceReviews(placeId: number, last: number): Promise<ReviewListResponse[]> {
+  async findPlaceReviews(
+    userId: number,
+    placeId: number,
+    last: number,
+  ): Promise<ReviewListResponse[]> {
     if (!(await this.placeRepository.exist({ where: { placeId } }))) {
       throw BaseException.of(PlaceResponseCode.PLACE_NOT_FOUND);
     }
-    const reviews = await this.reviewRepository.findById(placeId, last);
 
-    await Promise.all(
-      reviews.map(async review => {
-        const images = await this.reviewImageRepository.findBy({
-          reveiw: { reviewId: review.reviewId },
-        });
+    const reviews = await this.reviewRepository.find({
+      where: { place: { placeId }, reviewId: last ? LessThan(last) : null },
+      relations: ['author', 'images'],
+    });
 
-        review.setImages(images);
-      }),
+    const reviewResponse = await Promise.all(
+      reviews.map(async review =>
+        Builder<ReviewListResponse>()
+          .author({
+            userId: review.author.userId,
+            username: review.author.username,
+            profileImage: review.author.profileImage,
+            following: await this.userService.getFollowing(userId, review.author.userId),
+          })
+          .contents(review.contents)
+          .images(review.images)
+          .rating(review.rating)
+          .reviewId(review.reviewId)
+          .visitedAt(review.visitedAt)
+          .createdAt(review.createdAt)
+          .updatedAt(review.updatedAt)
+          .build(),
+      ),
     );
 
-    return reviews;
+    return reviewResponse;
   }
 }

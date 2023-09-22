@@ -266,6 +266,90 @@ export class PlaceRepository extends Repository<Place> {
     return (await qb.getRawMany<RawPlace>()).map(place => PlaceListResponse.from(place));
   }
 
+  async findByBoundsOrderByReview(center: number[], tr: number[]): Promise<PlaceListResponse[]> {
+    const [centerLat, centerLon] = center;
+    const [trLat, trLon] = tr;
+
+    const distanceSql = `st_distance_sphere(point(${centerLon}, ${centerLat}), point(p.lon, p.lat))`;
+    const boundsSql = `st_distance_sphere(point(${centerLon}, ${centerLat}), point(${trLon}, ${trLat}))`;
+
+    const qb = this.repository.createQueryBuilder('p');
+
+    qb.select([
+      'p.place_id placeId',
+      'p.name name',
+      'round(p.total_rating, 2) rating',
+      'p.review_count reviewCount',
+      'p.category category',
+      'p.lat lat',
+      'p.lon lon',
+      `round(${distanceSql} / 1000, 2) distance`,
+      'a.road road',
+      'a.jibun jibun',
+    ])
+      .leftJoin('p.address', 'a')
+      .where(`${distanceSql} < ${boundsSql}`)
+      .orderBy(`p.review_count`, 'DESC');
+
+    return (await qb.getRawMany<RawPlace>()).map(place => PlaceListResponse.from(place));
+  }
+
+  async findByBoundsOrderByDistance(center: number[], tr: number[]): Promise<PlaceListResponse[]> {
+    const [centerLat, centerLon] = center;
+    const [trLat, trLon] = tr;
+
+    const distanceSql = `st_distance_sphere(point(${centerLon}, ${centerLat}), point(p.lon, p.lat))`;
+    const boundsSql = `st_distance_sphere(point(${centerLon}, ${centerLat}), point(${trLon}, ${trLat}))`;
+
+    const qb = this.repository.createQueryBuilder('p');
+
+    qb.select([
+      'p.place_id placeId',
+      'p.name name',
+      'round(p.total_rating, 2) rating',
+      'p.review_count reviewCount',
+      'p.category category',
+      'p.lat lat',
+      'p.lon lon',
+      `round(${distanceSql} / 1000, 2) distance`,
+      'a.road road',
+      'a.jibun jibun',
+    ])
+      .leftJoin('p.address', 'a')
+      .where(`${distanceSql} < ${boundsSql}`)
+      .orderBy(`${distanceSql}`, 'ASC');
+
+    return (await qb.getRawMany<RawPlace>()).map(place => PlaceListResponse.from(place));
+  }
+
+  async findByBoundsOrderByRating(center: number[], tr: number[]): Promise<PlaceListResponse[]> {
+    const [centerLat, centerLon] = center;
+    const [trLat, trLon] = tr;
+
+    const distanceSql = `st_distance_sphere(point(${centerLon}, ${centerLat}), point(p.lon, p.lat))`;
+    const boundsSql = `st_distance_sphere(point(${centerLon}, ${centerLat}), point(${trLon}, ${trLat}))`;
+
+    const qb = this.repository.createQueryBuilder('p');
+
+    qb.select([
+      'p.place_id placeId',
+      'p.name name',
+      'round(p.total_rating, 2) rating',
+      'p.review_count reviewCount',
+      'p.category category',
+      'p.lat lat',
+      'p.lon lon',
+      `round(${distanceSql} / 1000, 2) distance`,
+      'a.road road',
+      'a.jibun jibun',
+    ])
+      .leftJoin('p.address', 'a')
+      .where(`${distanceSql} < ${boundsSql}`)
+      .orderBy(`p.total_rating`, 'DESC');
+
+    return (await qb.getRawMany<RawPlace>()).map(place => PlaceListResponse.from(place));
+  }
+
   async findPlaceNews(placeId: number, last: number): Promise<PlaceNewsResponse[]> {
     const qb = this.repository.createQueryBuilder('p');
 

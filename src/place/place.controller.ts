@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseArrayPipe,
   Post,
   Query,
   UploadedFiles,
@@ -23,12 +24,14 @@ import {
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
+import { ActivityService } from 'src/activity/activity.service';
 import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { BaseResponse } from 'src/global/base/base-response';
 import { GlobalResponseCode } from 'src/global/base/global-respose-code';
 import { ExtractPayload } from 'src/global/decorator/extract-payload.decorator';
-import { ReviewListResponse } from 'src/review/dto/review-list-response.dto';
-import { ReviewService } from 'src/review/review.service';
+import { ReviewListResponse } from 'src/place-review/dto/review-list-response.dto';
+import { ReviewService } from 'src/place-review/review.service';
+import { ActivityListResponse } from './dto/activity-list-response.dto';
 import { CreateReviewRequest } from './dto/create-review-request.dto';
 import { CreateReviewResponse } from './dto/create-review-response.dto';
 import { PlaceDetailResponse } from './dto/place-detail-response.dto';
@@ -44,7 +47,8 @@ import { PlaceService } from './place.service';
 export class PlaceController {
   constructor(
     private readonly placesService: PlaceService,
-    private readonly reviewsService: ReviewService,
+    private readonly reviewService: ReviewService,
+    private readonly activityService: ActivityService,
   ) {}
 
   @Get()
@@ -143,6 +147,44 @@ export class PlaceController {
     );
   }
 
+  @Get('maps')
+  @ApiOperation({
+    summary: '지도에서 장소 조회',
+    description: '현재 보고 있는 지도의 범위 내에서 장소를 조회합니다.',
+  })
+  @ApiQuery({
+    name: 'center',
+    description: '지도에서 중앙점의 좌표 ⚠️ 반드시 {위도}, {경도} 형식으로 보낼 것',
+    example: '37.547689, 126.942383',
+  })
+  @ApiQuery({
+    name: 'tr',
+    description: '지도에서 우상단의 좌표 ⚠️ 반드시 {위도}, {경도} 형식으로 보낼 것',
+    example: '37.572440, 126.885726',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    description: '정렬 기준',
+    enum: SortConditon,
+    required: false,
+    schema: {
+      default: 'distance',
+    },
+  })
+  @ApiOkResponse({
+    description: '조회 성공',
+    type: [PlaceListResponse],
+  })
+  async findPlacesByBounds(
+    @Query('center', new ParseArrayPipe({ items: Number, separator: ',' })) center: number[],
+    @Query('tr', new ParseArrayPipe({ items: Number, separator: ',' })) tr: number[],
+    @Query('sortBy') sortBy: string = SortConditon.DISTANCE,
+  ): Promise<BaseResponse<PlaceListResponse[]>> {
+    return new BaseResponse<PlaceListResponse[]>(
+      await this.placesService.findPlacesByBounds(center, tr, sortBy),
+    );
+  }
+
   @Get(':placeId')
   @ApiOperation({ summary: '장소 세부 정보 조회' })
   @ApiParam({ name: 'placeId', description: '세부 정보를 불러올 장소의 아이디' })
@@ -152,7 +194,7 @@ export class PlaceController {
     @Param('placeId') placeId: number,
   ): Promise<BaseResponse<PlaceDetailResponse>> {
     return new BaseResponse<PlaceDetailResponse>(
-      await this.placesService.getPlaceDeatil(userId, placeId),
+      await this.placesService.getPlaceDetail(userId, placeId),
     );
   }
 
@@ -169,11 +211,12 @@ export class PlaceController {
     required: false,
   })
   async findPlaceReviews(
+    @ExtractPayload() userId: number,
     @Param('placeId') placeId: number,
     @Query('last') last: number,
   ): Promise<BaseResponse<ReviewListResponse[]>> {
     return new BaseResponse<ReviewListResponse[]>(
-      await this.reviewsService.findPlaceReviews(placeId, last),
+      await this.reviewService.findPlaceReviews(userId, placeId, last),
     );
   }
 
@@ -227,8 +270,22 @@ export class PlaceController {
     @UploadedFiles() reviewImages: Express.Multer.File[],
   ): Promise<BaseResponse<CreateReviewResponse>> {
     return new BaseResponse(
-      await this.reviewsService.create(authorId, placeId, reqeust, reviewImages),
+      await this.reviewService.create(authorId, placeId, reqeust, reviewImages),
       GlobalResponseCode.CREATED,
+    );
+  }
+
+  @Get(':placeId/activities')
+  @ApiOperation({ summary: '장소 활동 조회' })
+  @ApiParam({ name: 'placeId', description: '장소 아이디' })
+  @ApiQuery({ name: 'last', description: '마지막으로 조회한 활동의 아이디, 페이징 용' })
+  @ApiOkResponse({ type: ActivityListResponse })
+  async findPlaceActivities(
+    @Param('placeId') placeId: number,
+    @Query('last') last: number,
+  ): Promise<BaseResponse<ActivityListResponse[]>> {
+    return new BaseResponse<ActivityListResponse[]>(
+      await this.activityService.findPlaceActivities(placeId, last),
     );
   }
 }

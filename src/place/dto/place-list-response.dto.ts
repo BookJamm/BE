@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type, plainToInstance } from 'class-transformer';
-import { ImageResponse } from 'src/global/dto/image.dto';
+import { ImageResponse } from 'src/global/dto/image-response.dto';
 
 export type RawPlace = {
   placeId: string;

@@ -1,6 +1,6 @@
 import { BaseEntity } from 'src/global/base/base.entity';
+import { Review } from 'src/place-review/entity/review.entity';
 import { PlaceBookmark } from 'src/place/entity/place-bookmark.entity';
-import { Review } from 'src/review/entity/review.entity';
 import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Follow } from './follow.entity';
 import { Password } from './password';
@@ -29,7 +29,7 @@ export class User extends BaseEntity {
   refreshToken: string;
 
   @OneToMany(() => Review, review => review.author)
-  review: Review;
+  reviews: Review[];
 
   @OneToMany(() => Follow, follow => follow.follower)
   followings: Follow[];

@@ -67,10 +67,8 @@ export class UserService {
 
     await Promise.all(
       users.map(async user => {
-        const { userId: searchedUserid } = user;
-        user.following = await this.followRepository.exist({
-          where: { follower: { userId }, followee: { userId: searchedUserid } },
-        });
+        const { userId: searchedUserId } = user;
+        user.following = await this.getFollowing(userId, searchedUserId);
       }),
     );
 
@@ -79,5 +77,15 @@ export class UserService {
 
   async recommnedFriends(): Promise<UserResponse[]> {
     return await this.userRepository.findOrderByRandom();
+  }
+
+  async getFollowing(userId: number, targetUserId: number) {
+    if (userId === targetUserId) {
+      return null;
+    }
+
+    return await this.followRepository.exist({
+      where: { follower: { userId }, followee: { userId: targetUserId } },
+    });
   }
 }

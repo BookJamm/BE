@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ImageResponse } from 'src/global/dto/image.dto';
+import { ImageResponse } from 'src/global/dto/image-response.dto';
 import { AddressResponse } from './place-list-response.dto';
 
 export class PlaceDetailResponse {

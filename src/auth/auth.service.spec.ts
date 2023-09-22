@@ -8,7 +8,7 @@ import { Password } from 'src/user/entity/password';
 import { User } from 'src/user/entity/user.entity';
 import { Repository } from 'typeorm';
 import { AuthService } from './auth.service';
-import { LoginResponse } from './dto/jwt-response.dto';
+import { JwtResponse } from './dto/jwt-response.dto';
 import { AuthResponseCode } from './exception/auth-respone-code';
 
 describe('AuthService 테스트', () => {
@@ -54,7 +54,7 @@ describe('AuthService 테스트', () => {
 
   describe('login 테스트', () => {
     it('로그인 성공', async () => {
-      const loginResponse: LoginResponse = await authService.login(ALEX.email, ALEX.password);
+      const loginResponse: JwtResponse = await authService.login(ALEX.email, ALEX.password);
 
       expect(jwtService.decode(loginResponse.accessToken)['userId']).toEqual(1);
       expect(jwtService.decode(loginResponse.refreshToken)['userId']).toEqual(1);

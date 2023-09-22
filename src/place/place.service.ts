@@ -5,7 +5,7 @@ import { getRegExp } from 'korean-regexp';
 import { DateTime } from 'luxon';
 import { BaseException } from 'src/global/base/base-exception';
 import { GlobalResponseCode } from 'src/global/base/global-respose-code';
-import { ReviewImage } from 'src/review/entity/review-image.entity';
+import { ReviewImage } from 'src/place-review/entity/review-image.entity';
 import { Repository } from 'typeorm';
 import { PlaceDetailResponse } from './dto/place-detail-response.dto';
 import { PlaceListResponse } from './dto/place-list-response.dto';
@@ -124,7 +124,42 @@ export class PlaceService {
     return places;
   }
 
-  async getPlaceDeatil(userId: number, placeId: number): Promise<PlaceDetailResponse> {
+  async findPlacesByBounds(
+    center: number[],
+    tr: number[],
+    sortBy: string,
+  ): Promise<PlaceListResponse[]> {
+    this.validateCoords(center[0], center[1]);
+    this.validateCoords(tr[0], tr[1]);
+
+    let places: PlaceListResponse[] = [];
+    switch (sortBy) {
+      case SortConditon.DISTANCE:
+        places = await this.placeRepository.findByBoundsOrderByDistance(center, tr);
+        break;
+      case SortConditon.RATING:
+        places = await this.placeRepository.findByBoundsOrderByRating(center, tr);
+        break;
+      case SortConditon.REVIEW:
+        places = await this.placeRepository.findByBoundsOrderByReview(center, tr);
+        break;
+      default:
+        throw BaseException.of(PlaceResponseCode.INVALID_SORT_CONDITION);
+    }
+
+    await Promise.all(
+      places.map(async place => {
+        const { placeId } = place;
+
+        place.images = await this.getPlaceImages(placeId);
+        place.open = await this.getPlaceOpen(placeId);
+      }),
+    );
+
+    return places;
+  }
+
+  async getPlaceDetail(userId: number, placeId: number): Promise<PlaceDetailResponse> {
     const place = await this.placeRepository.findOne({
       where: { placeId },
       relations: ['address', 'hours'],

@@ -1,18 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type, plainToInstance } from 'class-transformer';
-import { ImageResponse } from 'src/global/dto/image.dto';
-import { ReviewImage } from '../entity/review-image.entity';
+import { Type } from 'class-transformer';
+import { ImageResponse } from './image-response.dto';
 
-export type RawReview = {
-  reviewId: string;
-  visitedAt: Date;
-  rating: number;
-  userId: string;
-  username: string;
-  profileImage: string;
-};
-
-class Author {
+export class AuthorResponse {
   @Type(() => Number)
   @ApiProperty({ description: '사용자 아이디', example: 1 })
   userId: number;
@@ -25,9 +15,16 @@ class Author {
     example: 'https://bookjam-bucket.s3.ap-northeast-2.amazonaws.com/v4q0b0ff4hcpew1g6t39.jpg',
   })
   profileImage: string;
+
+  @ApiProperty({
+    description: '친구 여부, true면 친구로 등록되어 있는 상태, 자기 자신인 경우 null',
+    example: true,
+    nullable: true,
+  })
+  following: boolean;
 }
 
-export class ReviewListResponse {
+export class BaseReviewListResponse {
   @Type(() => Number)
   @ApiProperty({ description: '리뷰 아이디', example: 1 })
   reviewId: number;
@@ -38,22 +35,18 @@ export class ReviewListResponse {
   @ApiProperty({ description: '평점', example: 4.5 })
   rating: number;
 
+  @ApiProperty({ description: '리뷰 내용', example: '너무 좋아요' })
+  contents: string;
+
   @ApiProperty({ description: '리뷰 이미지', type: [ImageResponse] })
   images: ImageResponse[];
 
-  @Type(() => Author)
+  @Type(() => AuthorResponse)
   @ApiProperty({ description: '리뷰 작성자' })
-  author: Author;
+  author: AuthorResponse;
 
-  public static from(rawReview: RawReview): ReviewListResponse {
-    const { userId, username, profileImage, ...rest } = rawReview;
-    return plainToInstance(ReviewListResponse, {
-      ...rest,
-      author: { userId, username, profileImage },
-    });
-  }
-
-  setImages(images: ReviewImage[]) {
-    this.images = images;
-  }
+  @ApiProperty({ description: '리뷰 작성 시간' })
+  createdAt: Date;
+  @ApiProperty({ description: '리뷰 수정 시간, 수정되지 않았으면 null', nullable: true })
+  updatedAt: Date;
 }

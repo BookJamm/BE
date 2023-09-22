@@ -2,6 +2,7 @@ import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource, DataSourceOptions } from 'typeorm';
+import { ActivityModule } from './activity/activity.module';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import dbConfig from './global/config/db.config';
@@ -9,8 +10,8 @@ import jwtConfig from './global/config/jwt.config';
 import s3Config from './global/config/s3.config';
 import { TypeOrmConfigService } from './global/config/typeorm-config.service';
 import { LoggerMiddleware } from './global/log.middleware';
+import { ReviewModule } from './place-review/review.module';
 import { PlaceModule } from './place/place.module';
-import { ReviewModule } from './review/review.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -28,6 +29,7 @@ import { UserModule } from './user/user.module';
     UserModule,
     PlaceModule,
     ReviewModule,
+    ActivityModule,
   ],
   controllers: [AppController],
   providers: [],

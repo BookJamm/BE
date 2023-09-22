@@ -6,9 +6,9 @@ import { ExtractPayload } from 'src/global/decorator/extract-payload.decorator';
 import { DeleteReviewResponse } from './dto/delete-review-response.dto';
 import { ReviewService } from './review.service';
 
-@Controller('api/reviews')
+@Controller('api/place-reviews')
 @UseGuards(JwtAuthGuard)
-@ApiTags('reviews')
+@ApiTags('place reviews')
 @ApiBearerAuth()
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}

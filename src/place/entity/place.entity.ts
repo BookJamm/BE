@@ -1,3 +1,4 @@
+import { Activity } from 'src/activity/entity/activity.entity';
 import { BaseEntity, Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { PlaceAddress } from './place-address.entity';
 import { PlaceBookmark } from './place-bookmark.entity';
@@ -47,4 +48,7 @@ export class Place extends BaseEntity {
 
   @OneToMany(() => PlaceNews, news => news.place)
   news: PlaceNews[];
+
+  @OneToMany(() => Activity, activity => activity.place)
+  activities: Activity[];
 }
