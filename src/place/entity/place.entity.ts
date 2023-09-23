@@ -4,6 +4,7 @@ import { PlaceAddress } from './place-address.entity';
 import { PlaceBookmark } from './place-bookmark.entity';
 import { PlaceHour } from './place-hour.entity';
 import { PlaceNews } from './place-news.entity';
+import { Record } from 'src/record/entities/record.entity';
 
 @Entity('places')
 export class Place extends BaseEntity {
@@ -51,4 +52,7 @@ export class Place extends BaseEntity {
 
   @OneToMany(() => Activity, activity => activity.place)
   activities: Activity[];
+
+  @OneToMany(() => Record, record => record.place)
+  records: Record[];
 }

@@ -13,6 +13,7 @@ import { LoggerMiddleware } from './global/log.middleware';
 import { ReviewModule } from './place-review/review.module';
 import { PlaceModule } from './place/place.module';
 import { UserModule } from './user/user.module';
+import { RecordModule } from './record/record.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { UserModule } from './user/user.module';
     PlaceModule,
     ReviewModule,
     ActivityModule,
+    RecordModule,
   ],
   controllers: [AppController],
   providers: [],

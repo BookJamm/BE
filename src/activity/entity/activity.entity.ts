@@ -1,5 +1,14 @@
 import { Place } from 'src/place/entity/place.entity';
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Record } from 'src/record/entities/record.entity';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('activities')
 export class Activity extends BaseEntity {
@@ -33,4 +42,7 @@ export class Activity extends BaseEntity {
   @ManyToOne(() => Place, place => place.activities)
   @JoinColumn({ name: 'place_id', referencedColumnName: 'placeId' })
   place: Place;
+
+  @OneToMany(() => Record, record => record.activities)
+  records: Record[];
 }
