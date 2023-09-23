@@ -4,7 +4,7 @@ import { Record } from './record.entity';
 import { User } from 'src/user/entity/user.entity';
 
 @Entity('record_likes')
-export class RecordLikes extends BaseEntity {
+export class RecordLike extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -20,7 +20,7 @@ export class RecordLikes extends BaseEntity {
     this.liker = liker;
   }
 
-  public static createRecordLike(record: Record, user: User): RecordLikes {
-    return new RecordLikes(record, user);
+  public static createRecordLike(record: Record, user: User): RecordLike {
+    return new RecordLike(record, user);
   }
 }

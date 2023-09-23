@@ -1,4 +1,11 @@
-import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class RecordDto {
   @IsNumber()
@@ -25,12 +32,9 @@ export class RecordDto {
   @IsNotEmpty()
   contents: string;
 
-  @IsNumber()
-  isNotPublic: number;
+  @IsBoolean()
+  isNotPublic: boolean;
 
-  @IsNumber()
-  commentNotAllowed: number;
-
-  commentCount: number = 0;
-  likeCount: number = 0;
+  @IsBoolean()
+  commentNotAllowed: boolean;
 }

@@ -40,11 +40,12 @@ export class RecordRepository extends Repository<Record> {
         'cr.emotions as emotions',
         'cr.contents as contents',
         'cr.comment_not_allowed as commentNotAllowed',
+        'cr.is_not_public as isNotPublic',
         'cr.comment_count as commentCount',
         'cr.like_count as likeCount',
       ])
-      .leftJoin('places', 'places', 'cr.place_id = places.place_id')
-      .where('cr.isNotPublic = 0 and cr.author = :friendId', { friendId });
+      .leftJoin('cr.places', 'places')
+      .where('cr.is_not_public = 0 and cr.author = :friendId', { friendId });
 
     if (last) {
       query.andWhere('cr.created_at < (select created_at FROM records WHERE record_id = :last)', {
@@ -52,11 +53,13 @@ export class RecordRepository extends Repository<Record> {
       });
     }
 
-    query.groupBy('cr.record_id').orderBy('cr.created_at', 'DESC').limit(10);
+    query.orderBy('cr.created_at', 'DESC').limit(10);
 
     const records = (await query.getRawMany()).map(res => plainToInstance(RecordLIstResponse, res));
 
     for (const record of records) {
+      console.log(typeof record.recordId);
+
       const images = await this.imageRepository
         .createQueryBuilder('i')
         .select(['image_url'])
@@ -97,11 +100,12 @@ export class RecordRepository extends Repository<Record> {
         'cr.emotions as emotions',
         'cr.contents as contents',
         'cr.comment_not_allowed as commentNotAllowed',
+        'cr.is_not_public as isNotPublic',
         'cr.comment_count as commentCount',
         'cr.like_count as likeCount',
       ])
-      .leftJoin('places', 'places', 'cr.place_id = places.place_id')
-      .where('cr.isNotPublic = 0 and cr.author in (:friends)', { friends });
+      .leftJoin('cr.places', 'places')
+      .where('cr.is_not_public = 0 and cr.author in (:friends)', { friends });
 
     if (last) {
       query.andWhere('cr.created_at < (select created_at FROM records WHERE record_id = :last)', {
@@ -109,7 +113,7 @@ export class RecordRepository extends Repository<Record> {
       });
     }
 
-    query.groupBy('cr.record_id').orderBy('cr.created_at', 'DESC').limit(10);
+    query.orderBy('cr.created_at', 'DESC').limit(10);
 
     const records = (await query.getRawMany()).map(res => plainToInstance(RecordLIstResponse, res));
 

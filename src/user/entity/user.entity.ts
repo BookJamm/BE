@@ -4,7 +4,7 @@ import { PlaceBookmark } from 'src/place/entity/place-bookmark.entity';
 import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Follow } from './follow.entity';
 import { Password } from './password';
-import { RecordLikes } from 'src/record/entities/record-like.entity';
+import { RecordLike } from 'src/record/entities/record-like.entity';
 import { Record } from 'src/record/entities/record.entity';
 
 @Entity('users')
@@ -45,8 +45,8 @@ export class User extends BaseEntity {
   @OneToMany(() => Record, record => record.author)
   records: Record[];
 
-  @OneToMany(() => RecordLikes, recordLikes => recordLikes.liker)
-  likes: RecordLikes[];
+  @OneToMany(() => RecordLike, recordLikes => recordLikes.liker)
+  likes: RecordLike[];
 
   constructor(email: string, password: Password, username: string) {
     super();

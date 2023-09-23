@@ -4,18 +4,19 @@ import { Place } from 'src/place/entity/place.entity';
 import { User } from 'src/user/entity/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { RecordImage } from './record-image.entity';
-import { RecordLikes } from './record-like.entity';
+import { RecordLike } from './record-like.entity';
 
 @Entity('records')
 export class Record extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: 'bigint' })
   recordId: number;
 
   @ManyToOne(() => User, author => author.records)
   @JoinColumn({ name: 'author', referencedColumnName: 'userId' })
+  @Column({ type: 'bigint' })
   author: User;
 
-  @Column()
+  @Column({ type: 'int' })
   status: number;
 
   @Column()
@@ -23,7 +24,7 @@ export class Record extends BaseEntity {
 
   @ManyToOne(() => Place, place => place.records)
   @JoinColumn({ name: 'place_id', referencedColumnName: 'placeId' })
-  place: Place;
+  places: Place;
 
   @Column()
   isbn: string;
@@ -32,30 +33,30 @@ export class Record extends BaseEntity {
   @JoinColumn({ name: 'activities', referencedColumnName: 'activityId' })
   activities: Activity;
 
-  @Column()
+  @Column({ type: 'int' })
   emotions: number;
 
   @Column()
   contents: string;
 
   @Column()
-  commentNotAllowed: number;
+  commentNotAllowed: boolean;
 
-  @Column()
+  @Column({ type: 'bigint' })
   commentCount: number;
 
-  @Column()
+  @Column({ type: 'bigint' })
   likeCount: number;
 
   @Column()
-  isNotPublic: number;
+  isNotPublic: boolean;
 
   @OneToMany(() => RecordImage, recordImages => recordImages.record)
-  @JoinColumn({ name: 'images' })
+  @JoinColumn({ name: 'images', referencedColumnName: 'imageUrl' })
   images: RecordImage[];
 
-  @OneToMany(() => RecordLikes, recordlikes => recordlikes.record)
-  likes: RecordLikes[];
+  @OneToMany(() => RecordLike, recordlikes => recordlikes.record)
+  likes: RecordLike[];
 
   constructor(
     author: User,
@@ -65,15 +66,15 @@ export class Record extends BaseEntity {
     emotions: number,
     activities: Activity,
     contents: string,
-    isNotPublic: number,
-    commentNotAllowed: number,
+    commentNotAllowed: boolean,
     commentCount: number,
     likeCount: number,
+    isNotPublic: boolean,
   ) {
     super();
     this.author = author;
     this.date = date;
-    this.place = place;
+    this.places = place;
     this.isbn = isbn;
     this.activities = activities;
     this.emotions = emotions;
@@ -92,10 +93,10 @@ export class Record extends BaseEntity {
     activities: Activity,
     emotions: number,
     contents: string,
-    commentNotAllowed: number,
+    commentNotAllowed: boolean,
     commentCount: number,
     likeCount: number,
-    isNotPublic: number,
+    isNotPublic: boolean,
   ): Record {
     return new Record(
       author,

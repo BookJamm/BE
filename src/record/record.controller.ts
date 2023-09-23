@@ -27,7 +27,7 @@ import { ExtractPayload } from 'src/global/decorator/extract-payload.decorator';
 import { RecordService } from './record.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { RecordDto } from './dto/record.dto';
-import { postRecordResponse } from './dto/post-record-response.dto';
+import { PostRecordResponse } from './dto/post-record-response.dto';
 import { RecordLIstResponse } from './dto/record-list-response.dto';
 
 @Controller('api/records')
@@ -59,8 +59,8 @@ export class RecordController {
   async postRecord(
     @ExtractPayload() userId: number,
     @Body() record: RecordDto,
-  ): Promise<BaseResponse<postRecordResponse>> {
-    return new BaseResponse<postRecordResponse>(
+  ): Promise<BaseResponse<PostRecordResponse>> {
+    return new BaseResponse<PostRecordResponse>(
       await this.recordService.postRecord(userId, record),
       GlobalResponseCode.CREATED,
     );

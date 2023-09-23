@@ -1,50 +1,58 @@
-import { IsArray, IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class RecordLIstResponse {
   @IsNumber()
-  recordId: number;
+  readonly recordId: number;
 
   @IsNumber()
-  author: number;
+  readonly author: number;
 
   @IsDate()
-  createdAt: Date;
+  readonly createdAt: Date;
 
   @IsNumber()
-  status: number;
+  readonly status: number;
 
   @IsDate()
-  date: Date;
+  readonly date: Date;
 
   @IsNumber()
-  placeId: number;
+  @IsOptional()
+  readonly placeId: number;
 
   @IsString()
-  placeName: string;
+  @IsOptional()
+  readonly placeName: string;
 
   @IsNumber()
-  category: number;
+  @IsOptional()
+  readonly category: number;
 
   @IsString()
-  isbn: string;
+  @IsOptional()
+  readonly isbn: string;
 
   @IsNumber()
-  activity: number;
+  @IsOptional()
+  readonly activity: number;
 
   @IsNumber()
-  emotions: number;
+  readonly emotions: number;
 
   @IsString()
-  contents: string;
+  readonly contents: string;
+
+  @IsBoolean()
+  readonly commentNotAllowed: boolean;
+
+  @IsBoolean()
+  readonly isNotPublic: boolean;
 
   @IsNumber()
-  commentNotAllowed: number;
+  readonly commentCount: number;
 
   @IsNumber()
-  commentCount: number;
-
-  @IsNumber()
-  likeCount: number;
+  readonly likeCount: number;
 
   @IsArray()
   @IsOptional()

@@ -53,6 +53,6 @@ export class Place extends BaseEntity {
   @OneToMany(() => Activity, activity => activity.place)
   activities: Activity[];
 
-  @OneToMany(() => Record, record => record.place)
+  @OneToMany(() => Record, record => record.places)
   records: Record[];
 }
