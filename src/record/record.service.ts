@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Record } from './entities/record.entity';
 import { User } from 'src/user/entity/user.entity';
-import { Repository } from 'typeorm';
+import { Like, Raw, Repository } from 'typeorm';
 import { Place } from 'src/place/entity/place.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RecordImage } from './entities/record-image.entity';
@@ -14,6 +14,8 @@ import { Activity } from 'src/activity/entity/activity.entity';
 import { ActivityResponseCode } from 'src/activity/exception/activity-response-code';
 import { RecordRepository } from './entities/record.repository';
 import { RecordDto } from './dto/record.dto';
+import { Follow } from 'src/user/entity/follow.entity';
+import { RecordLIstResponse } from './dto/record-list-response.dto';
 
 @Injectable()
 export class RecordService {
@@ -29,10 +31,39 @@ export class RecordService {
     private readonly recordImageRepository: Repository<RecordImage>,
     @InjectRepository(RecordLikes)
     private readonly recordLikesRepository: Repository<RecordLikes>,
+    @InjectRepository(Follow)
+    private readonly followRepository: Repository<Follow>,
     private readonly s3Service: S3Service,
   ) {}
 
-  async getFriendsRecords() {}
+  async getFriendsRecords(userId: number, friendId?: number, last?: number) {
+    const user: User = await this.userRepository.findOneBy({ userId: userId });
+    if (!user) {
+      throw BaseException.of(UserResponseCode.USER_NOT_FOUND);
+    }
+    if (friendId) {
+      const friend: User = await this.userRepository.findOneBy({ userId: friendId });
+      if (!friend) {
+        throw BaseException.of(UserResponseCode.USER_NOT_FOUND);
+      }
+      const chkFollow: Follow = await this.followRepository.findOneBy({
+        follower: { userId },
+        followee: { userId: friendId },
+      });
+      if (!chkFollow) {
+        throw BaseException.of(UserResponseCode.NOT_FOLLOWING_USER);
+      }
+      const friendRecords: RecordLIstResponse[] =
+        await this.recordRepository.findFriendRecordsByFriendId(friendId, last);
+      return friendRecords;
+    } else {
+      const friendRecords: RecordLIstResponse[] = await this.recordRepository.findAllFriendRecords(
+        userId,
+        last,
+      );
+      return friendRecords;
+    }
+  }
   async postRecordImages() {}
   async postRecord(userId: number, recordDto: RecordDto) {
     const author: User = await this.userRepository.findOneBy({ userId: userId });

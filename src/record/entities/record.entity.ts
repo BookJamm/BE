@@ -51,6 +51,7 @@ export class Record extends BaseEntity {
   isNotPublic: number;
 
   @OneToMany(() => RecordImage, recordImages => recordImages.record)
+  @JoinColumn({ name: 'images' })
   images: RecordImage[];
 
   @OneToMany(() => RecordLikes, recordlikes => recordlikes.record)

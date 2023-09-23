@@ -9,6 +9,7 @@ import {
   UseGuards,
   UseInterceptors,
   Put,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -27,6 +28,7 @@ import { RecordService } from './record.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { RecordDto } from './dto/record.dto';
 import { postRecordResponse } from './dto/post-record-response.dto';
+import { RecordLIstResponse } from './dto/record-list-response.dto';
 
 @Controller('api/records')
 @UseGuards(JwtAuthGuard)
@@ -36,8 +38,15 @@ export class RecordController {
   constructor(private readonly recordService: RecordService) {}
 
   @Get('friends')
-  async getFriendsRecords() {
-    return this.recordService.getFriendsRecords();
+  async getFriendsRecords(
+    @ExtractPayload() userId: number,
+    @Body('friendId') friendId?: number,
+    @Query('last') last?: number,
+  ): Promise<BaseResponse<RecordLIstResponse[]>> {
+    return new BaseResponse<RecordLIstResponse[]>(
+      await this.recordService.getFriendsRecords(userId, friendId, last),
+      GlobalResponseCode.OK,
+    );
   }
 
   @Post(':recordId/images')
