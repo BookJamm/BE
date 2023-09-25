@@ -4,9 +4,11 @@ import {
   S3Client,
   S3ClientConfig,
 } from '@aws-sdk/client-s3';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
+import { BaseException } from 'src/global/base/base-exception';
+import { S3ResponseCode } from './exception/s3-response-code';
 
 @Injectable()
 export class S3Service {
@@ -14,8 +16,10 @@ export class S3Service {
   private readonly S3_BASE_URL = 'https://bookjam.s3.ap-northeast-2.amazonaws.com/';
   private readonly DIR = {
     REVIEW: 'review',
+    PROFILE: 'profile',
   };
-  private readonly BUCKET;
+  private readonly BUCKET: string;
+  private readonly logger: Logger = new Logger(S3Service.name);
 
   constructor(private readonly configService: ConfigService) {
     const options: S3ClientConfig = {
@@ -30,31 +34,55 @@ export class S3Service {
     this.BUCKET = configService.get('s3.bucket', { infer: true });
   }
 
-  async uploadFile(key: string, file: Express.Multer.File) {
+  async uploadReviewImageFile(file: Express.Multer.File) {
+    return this.uploadFile(this.DIR.REVIEW, file);
+  }
+
+  async uploadProfileImageFile(file: Express.Multer.File) {
+    return this.uploadFile(this.DIR.PROFILE, file);
+  }
+
+  private async uploadFile(dir: string, file: Express.Multer.File) {
+    const key = this.generateKeyName(dir, file.originalname);
+
     const commnad = new PutObjectCommand({
-      Bucket: this.configService.get('s3.bucket', { infer: true }),
+      Bucket: this.BUCKET,
       Key: key,
       Body: file.buffer,
       ContentType: file.mimetype,
     });
-
-    await this.s3.send(commnad);
+    try {
+      await this.s3.send(commnad);
+    } catch (error) {
+      this.logger.error('S3에 파일 업로드 실패', error.stack);
+      throw BaseException.of(S3ResponseCode.UPLOAD_FAILED);
+    }
 
     return `${this.S3_BASE_URL}${key}`;
   }
 
-  async deleteFile(key: string) {
+  async deleteFileByUrl(url: string) {
+    const key = this.getKeyFromUrl(url);
+    this.deleteFile(key);
+  }
+
+  private async deleteFile(key: string) {
     const command = new DeleteObjectCommand({
       Key: key,
       Bucket: this.BUCKET,
     });
 
-    await this.s3.send(command);
+    try {
+      await this.s3.send(command);
+    } catch (error) {
+      this.logger.error('S3 파일 삭제 실패', error.stack);
+      throw BaseException.of(S3ResponseCode.DELETE_FAILED);
+    }
   }
 
-  generateReviewKeyName(originalFileName: string) {
+  private generateKeyName(dir: string, originalFileName: string) {
     const uuid = crypto.randomUUID();
-    return `${this.DIR.REVIEW}/${uuid}_${originalFileName}`;
+    return `${dir}/${uuid}_${originalFileName}`;
   }
 
   getKeyFromUrl(url: string) {
