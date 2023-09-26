@@ -69,12 +69,13 @@ async function bootstrap() {
   );
 
   // Exception Handler
+  // 아래에서 위로 순위가 정해짐
   app.useGlobalFilters(
-    new AnyErrorExceptionFilter(), // 3rd
-    new DatabaseExceptionFilter(), // 2nd
+    new AnyErrorExceptionFilter(),
+    new DatabaseExceptionFilter(),
     new NoHandlerFoundExceptionFilter(),
     new ValidationErrorExceptionFilter(),
-    new BaseExceptionFilter(), // 1st
+    new BaseExceptionFilter(),
   );
 
   await app.listen(3000);
