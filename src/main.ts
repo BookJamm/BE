@@ -9,6 +9,7 @@ import {
   BaseExceptionFilter,
   DatabaseExceptionFilter,
   NoHandlerFoundExceptionFilter,
+  ValidationErrorExceptionFilter,
 } from './global/filter/http-exception.filter';
 import { setupSwagger } from './swagger';
 
@@ -61,22 +62,20 @@ async function bootstrap() {
           });
         });
 
-        return new BadRequestException({
-          status: 400,
-          code: 'REQ_001',
-          message,
-        });
+        throw new BadRequestException(message);
       },
       whitelist: true,
     }),
   );
 
   // Exception Handler
+  // 아래에서 위로 순위가 낮아짐
   app.useGlobalFilters(
-    new AnyErrorExceptionFilter(), // 3rd
-    new DatabaseExceptionFilter(), // 2nd
+    new AnyErrorExceptionFilter(),
+    new DatabaseExceptionFilter(),
     new NoHandlerFoundExceptionFilter(),
-    new BaseExceptionFilter(), // 1st
+    new ValidationErrorExceptionFilter(),
+    new BaseExceptionFilter(),
   );
 
   await app.listen(3000);
