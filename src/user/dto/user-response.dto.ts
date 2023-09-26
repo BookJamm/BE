@@ -10,6 +10,7 @@ export class UserResponse {
     description: '프로필 이미지 주소',
     example:
       'https://bookjam-bucket.s3.ap-northeast-2.amazonaws.com/1690391690485_beagle-hound-dog.webp',
+    nullable: true,
   })
   profileImage: string;
 
@@ -19,6 +20,6 @@ export class UserResponse {
   @ApiProperty({ description: '이메일', example: 'abc@naver.com' })
   email: string;
 
-  @ApiProperty({ description: '해당 사용자 팔로우 여부', example: true })
+  @ApiProperty({ description: '해당 사용자 팔로우 여부', example: true, nullable: true })
   following: boolean = false;
 }

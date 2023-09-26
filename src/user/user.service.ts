@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { getRegExp } from 'korean-regexp';
+import { S3Service } from 'src/aws/s3/s3.service';
 import { BaseException } from 'src/global/base/base-exception';
 import { GlobalResponseCode } from 'src/global/base/global-respose-code';
 import { Repository } from 'typeorm';
@@ -18,9 +19,15 @@ export class UserService {
     private readonly userRepository: UserRepository,
     @InjectRepository(Follow)
     private readonly followRepository: Repository<Follow>,
+    private readonly s3Service: S3Service,
   ) {}
 
-  async create(user: User): Promise<number> {
+  async create(user: User, profileImage: Express.Multer.File): Promise<number> {
+    if (profileImage) {
+      const url = await this.s3Service.uploadProfileImageFile(profileImage);
+      user.profileImage = url;
+    }
+
     const newUser = await this.userRepository.save(user);
 
     return newUser.userId;
@@ -65,12 +72,14 @@ export class UserService {
 
     const users = await this.userRepository.findByKeyword(userId, keywordRegExp, last);
 
-    await Promise.all(
-      users.map(async user => {
-        const { userId: searchedUserId } = user;
-        user.following = await this.getFollowing(userId, searchedUserId);
-      }),
-    );
+    if (userId) {
+      await Promise.all(
+        users.map(async user => {
+          const { userId: searchedUserId } = user;
+          user.following = await this.getFollowing(userId, searchedUserId);
+        }),
+      );
+    }
 
     return users;
   }
@@ -80,7 +89,7 @@ export class UserService {
   }
 
   async getFollowing(userId: number, targetUserId: number) {
-    if (userId === targetUserId) {
+    if (!userId || userId === targetUserId) {
       return null;
     }
 
