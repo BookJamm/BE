@@ -1,4 +1,11 @@
-import { ArgumentsHost, Catch, ExceptionFilter, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  BadRequestException,
+  Catch,
+  ExceptionFilter,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { Response } from 'express';
 import { TypeORMError } from 'typeorm';
 import { BaseException } from '../base/base-exception';
@@ -47,6 +54,19 @@ export class NoHandlerFoundExceptionFilter implements ExceptionFilter {
     const status = code.getStatus();
 
     response.status(status).json(new ErrorResponse(code));
+  }
+}
+
+@Catch(BadRequestException)
+export class ValidationErrorExceptionFilter implements ExceptionFilter {
+  catch(exception: BadRequestException, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+
+    const code = GlobalResponseCode.VALIDATION_ERROR;
+    const status = code.getStatus();
+
+    response.status(status).json(new ErrorResponse(code, exception.message));
   }
 }
 
