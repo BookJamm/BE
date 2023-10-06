@@ -2,11 +2,6 @@ import { HttpStatus } from '@nestjs/common';
 import { ResponseCode } from 'src/global/base/response-code';
 
 export const ReviewResponseCode = {
-  IMAGE_UPLOAD_FAIL: new ResponseCode(
-    HttpStatus.INTERNAL_SERVER_ERROR,
-    'REVIEW_001',
-    '이미지 업로드에 실패하였습니다.',
-  ),
   NOT_OWNER: new ResponseCode(
     HttpStatus.FORBIDDEN,
     'REVIEW_002',

@@ -1,12 +1,27 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
+  ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
   ApiTags,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { BaseResponse } from 'src/global/base/base-response';
@@ -55,13 +70,38 @@ export class UserController {
   }
 
   @Post('sign-up')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiOperation({
+    summary: '이메일 회원 가입',
+    description: '이메일을 통한 회원 가입을 진행합니다. ⚠️ multipart/form-data로 보낼 것!',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiExtraModels(SignUpRequest)
+  @ApiBody({
+    schema: {
+      allOf: [
+        {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              format: 'binary',
+            },
+          },
+        },
+        { $ref: getSchemaPath(SignUpRequest) },
+      ],
+    },
+  })
   @ApiCreatedResponse({
     type: SignUpResponse,
     description: '회원가입 성공',
   })
-  @ApiOperation({ summary: '회원 가입' })
-  async signUp(@Body() reqeust: SignUpRequest): Promise<BaseResponse<SignUpResponse>> {
-    const newUserId: number = await this.userService.create(await reqeust.toUser());
+  async signUp(
+    @Body() reqeust: SignUpRequest,
+    @UploadedFile() profileImage: Express.Multer.File,
+  ): Promise<BaseResponse<SignUpResponse>> {
+    const newUserId: number = await this.userService.create(await reqeust.toUser(), profileImage);
     return new BaseResponse({ userId: newUserId }, GlobalResponseCode.CREATED);
   }
 

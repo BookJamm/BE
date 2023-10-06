@@ -1,4 +1,4 @@
-import { Injectable, Logger, LoggerService } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Builder } from 'builder-pattern';
 import { S3Service } from 'src/aws/s3/s3.service';
@@ -19,7 +19,7 @@ import { ReviewResponseCode } from './exception/review-response-code';
 
 @Injectable()
 export class ReviewService {
-  private readonly logger: LoggerService = new Logger(ReviewService.name);
+  private readonly logger: Logger = new Logger(ReviewService.name);
 
   constructor(
     @InjectRepository(User)
@@ -57,19 +57,11 @@ export class ReviewService {
       author,
     );
     review = await this.reviewRepository.save(review);
-    try {
-      await Promise.all(
-        reviewImages.map(async image => {
-          const key = this.s3Service.generateReviewKeyName(image.originalname);
-          const imageUrl = await this.s3Service.uploadFile(key, image);
 
-          const reviewImage = ReviewImage.createReviewImage(imageUrl, review);
-          await this.reviewImageRepository.save(reviewImage);
-        }),
-      );
-    } catch (error) {
-      this.logger.error(error);
-      throw BaseException.of(ReviewResponseCode.IMAGE_UPLOAD_FAIL);
+    for (const image of reviewImages) {
+      const imageUrl = await this.s3Service.uploadProfileImageFile(image);
+      const reviewImage = ReviewImage.createReviewImage(imageUrl, review);
+      await this.reviewImageRepository.save(reviewImage);
     }
 
     return { reviewId: review.reviewId };
@@ -92,10 +84,10 @@ export class ReviewService {
     const images = await this.reviewImageRepository.findBy({
       reveiw: { reviewId: targetReviewId },
     });
-    images.forEach(async ({ imageUrl }) => {
-      const key = this.s3Service.getKeyFromUrl(imageUrl);
-      await this.s3Service.deleteFile(key);
-    });
+
+    for (const image of images) {
+      await this.s3Service.deleteFileByUrl(image.imageUrl);
+    }
 
     await this.reviewRepository.remove(review);
     return { deleted: true };
