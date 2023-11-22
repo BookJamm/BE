@@ -2,7 +2,6 @@ import { BaseEntity } from 'src/global/base/base.entity';
 import { Review } from 'src/place-review/entity/review.entity';
 import { PlaceBookmark } from 'src/place/entity/place-bookmark.entity';
 import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { SocialType } from '../enum/social-type';
 import { Follow } from './follow.entity';
 import { Password } from './password';
 
@@ -28,12 +27,6 @@ export class User extends BaseEntity {
 
   @Column()
   refreshToken: string;
-
-  @Column({ type: 'enum', enum: SocialType })
-  socialType: SocialType;
-
-  @Column()
-  socialId: string;
 
   @OneToMany(() => Review, review => review.author)
   reviews: Review[];
