@@ -32,7 +32,6 @@
     "@types/bcrypt": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.2",
     "@vrbo/pino-rotating-file": "^4.4.0",
-    "axios": "^1.6.2",
     "bcrypt": "^5.1.1",
     "builder-pattern": "^2.2.0",
     "class-transformer": "^0.5.1",
