@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { EmailCheckRequest } from './dto/email-check-request.dto';
 import { EmailCheckResponse } from './dto/email-check-response.dto';
 import { JwtResponse } from './dto/jwt-response.dto';
+import { KakaoOAuthRequest } from './dto/kakao-oauth-request.dto';
 import { LoginRequest } from './dto/login-request.dto';
 import { JwtAuthGuard } from './guard/auth.guard';
 
@@ -54,5 +55,10 @@ export class AuthController {
     return new BaseResponse<EmailCheckResponse>({
       availabe: await this.authService.checkEmailTaken(reqeust.email),
     });
+  }
+
+  @Post('login/kakao')
+  async kakaoOAuth(@Body() request: KakaoOAuthRequest) {
+    return this.authService.kakaoOAuth(request.accessToken);
   }
 }
