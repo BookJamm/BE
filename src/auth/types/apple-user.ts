@@ -1,5 +1,4 @@
 import * as jwt from 'jsonwebtoken';
-import { JwtHeader } from 'jwt-decode';
 
 export type AppleJWTPayload = jwt.JwtPayload & {
   iss: string;
@@ -8,11 +7,12 @@ export type AppleJWTPayload = jwt.JwtPayload & {
   iat: number;
   sub: string;
   nonce: string;
-  c_hash: string;
+  nonce_supported: boolean;
   email: string;
   email_verified: string;
   is_private_email: string;
-  auth_time: number;
+  real_user_status: number;
+  transfer_sub: string;
 };
 
 export type AppleAuthKeys = {
@@ -25,8 +25,6 @@ export type AppleAuthKeys = {
     e: string;
   }[];
 };
-
-export type JwtHeaderWithKid = JwtHeader & { kid: string };
 
 export const APPLE_AUTH_TOKEN_URL = 'https://appleid.apple.com/auth/keys';
 

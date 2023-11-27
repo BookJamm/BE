@@ -18,13 +18,12 @@ import { KakaoUser } from './types/kakao-user';
 import { AppleOAuthResponse } from './dto/apple-oauth-response.dto';
 import * as jwt from 'jsonwebtoken';
 import * as jwksClient from 'jwks-rsa';
-import { jwtDecode } from 'jwt-decode';
+import { JwtHeader, jwtDecode } from 'jwt-decode';
 import {
   APPLE_AUTH_TOKEN_URL,
   APPLE_ISSUER,
   AppleAuthKeys,
   AppleJWTPayload,
-  JwtHeaderWithKid,
   APP_BUNDLE_ID,
 } from './types/apple-user';
 
@@ -265,7 +264,7 @@ export class AuthService {
 
   private async getAppleUserByAccessToken(accessToken: string): Promise<AppleJWTPayload> {
     try {
-      const tokenDecodedHeader = jwtDecode<JwtHeaderWithKid>(accessToken, {
+      const tokenDecodedHeader = jwtDecode<JwtHeader>(accessToken, {
         header: true,
       });
 
@@ -275,7 +274,9 @@ export class AuthService {
         jwksUri: APPLE_AUTH_TOKEN_URL,
       });
 
-      const sharedKid = applePublicKey.keys.find(key => key.kid === tokenDecodedHeader.kid)?.kid;
+      const sharedKid = applePublicKey.keys.find(
+        key => key.kid === tokenDecodedHeader.kid && key.alg === tokenDecodedHeader.alg,
+      )?.kid;
       const key = await client.getSigningKey(sharedKid);
       const signingKey = key.getPublicKey(); // rsa public key
       const payload = <AppleJWTPayload>jwt.verify(accessToken, signingKey);
