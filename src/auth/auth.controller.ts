@@ -10,6 +10,7 @@ import { JwtResponse } from './dto/jwt-response.dto';
 import { KakaoOAuthRequest } from './dto/kakao-oauth-request.dto';
 import { LoginRequest } from './dto/login-request.dto';
 import { JwtAuthGuard } from './guard/auth.guard';
+import { AppleOAuthRequest } from './dto/apple-oauth-request.dto';
 
 @Controller('api/auth')
 @ApiTags('auth')
@@ -60,5 +61,10 @@ export class AuthController {
   @Post('login/kakao')
   async kakaoOAuth(@Body() request: KakaoOAuthRequest) {
     return this.authService.kakaoOAuth(request.accessToken);
+  }
+
+  @Post('login/kakao')
+  async appleOAuth(@Body() request: AppleOAuthRequest) {
+    return this.authService.appleOAuth(request.accessToken);
   }
 }

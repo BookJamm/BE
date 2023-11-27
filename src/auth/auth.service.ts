@@ -15,6 +15,18 @@ import { KakaoOAuthResponse } from './dto/kakao-oauth-response.dto';
 import { AuthResponseCode } from './exception/auth-respone-code';
 import { JwtClaim } from './types/jwt-claim';
 import { KakaoUser } from './types/kakao-user';
+import { AppleOAuthResponse } from './dto/apple-oauth-response.dto';
+import * as jwt from 'jsonwebtoken';
+import * as jwksClient from 'jwks-rsa';
+import { jwtDecode } from 'jwt-decode';
+import {
+  APPLE_AUTH_TOKEN_URL,
+  APPLE_ISSUER,
+  AppleAuthKeys,
+  AppleJWTPayload,
+  JwtHeaderWithKid,
+  APP_BUNDLE_ID,
+} from './types/apple-user';
 
 @Injectable()
 export class AuthService {
@@ -189,5 +201,97 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async appleOAuth(appleAccessToken: string): Promise<AppleOAuthResponse> {
+    const socialType = SocialType.APPLE;
+    let isLogin = true;
+
+    const appleUser = await this.getAppleUserByAccessToken(appleAccessToken);
+    const socialId = appleUser.sub;
+    const socialEmail = appleUser.email;
+
+    let user = await this.userRepository.findOneBy({ socialId, socialType });
+
+    let accessToken = '';
+    let refreshToken = '';
+
+    if (!user) {
+      isLogin = false;
+
+      user = await this.userRepository.save(
+        Builder(User)
+          .email(socialEmail)
+          .socialId(socialId)
+          .socialType(socialType)
+          .username(socialEmail.split('@')[0])
+          .refreshToken(refreshToken)
+          .build(),
+      );
+
+      accessToken = await this.generateAccessToken(
+        user.userId,
+        Object.values(SocialType)[socialType],
+        user.socialId,
+      );
+
+      refreshToken = await this.generateRefreshToken(
+        user.userId,
+        Object.values(SocialType)[socialType],
+        user.socialId,
+      );
+    } else {
+      isLogin = true;
+
+      accessToken = await this.generateAccessToken(
+        user.userId,
+        Object.values(SocialType)[socialType],
+        user.socialId,
+      );
+
+      refreshToken = await this.generateRefreshToken(
+        user.userId,
+        Object.values(SocialType)[socialType],
+        user.socialId,
+      );
+    }
+
+    return Builder(AppleOAuthResponse)
+      .isLogin(isLogin)
+      .accessToken(accessToken)
+      .refreshToken(refreshToken)
+      .build();
+  }
+
+  private async getAppleUserByAccessToken(accessToken: string): Promise<AppleJWTPayload> {
+    try {
+      const tokenDecodedHeader = jwtDecode<JwtHeaderWithKid>(accessToken, {
+        header: true,
+      });
+
+      const { data: applePublicKey } = await axios.get<AppleAuthKeys>(APPLE_AUTH_TOKEN_URL);
+
+      const client = jwksClient({
+        jwksUri: APPLE_AUTH_TOKEN_URL,
+      });
+
+      const sharedKid = applePublicKey.keys.find(key => key.kid === tokenDecodedHeader.kid)?.kid;
+      const key = await client.getSigningKey(sharedKid);
+      const signingKey = key.getPublicKey(); // rsa public key
+      const payload = <AppleJWTPayload>jwt.verify(accessToken, signingKey);
+      this.validateAppleToken(payload);
+      return payload;
+    } catch (error) {
+      throw BaseException.of(AuthResponseCode.APPLE_REQUEST_FAILED);
+    }
+  }
+
+  async validateAppleToken(payload: AppleJWTPayload) {
+    if (payload.iss !== APPLE_ISSUER) {
+      throw BaseException.of(AuthResponseCode.INVALID_APPLE_ISSUER);
+    }
+    if (payload.aud !== APP_BUNDLE_ID) {
+      throw BaseException.of(AuthResponseCode.INVALID_APPLE_AUDIENCE);
+    }
   }
 }
