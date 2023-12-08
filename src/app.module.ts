@@ -19,7 +19,7 @@ import { UserModule } from './user/user.module';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [dbConfig, jwtConfig, s3Config],
-      envFilePath: ['.env'],
+      envFilePath: `.env.${process.env.NODE_ENV}`,
     }),
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
