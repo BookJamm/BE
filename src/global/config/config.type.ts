@@ -5,6 +5,7 @@ export type DatabaseConfig = {
   database?: string;
   username?: string;
   maxConnections: number;
+  synchronize?: boolean;
 };
 
 export type AuthConfig = {
