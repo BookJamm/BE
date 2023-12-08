@@ -18,8 +18,6 @@ import { PlaceResponseCode } from './exception/place-response-code';
 
 @Injectable()
 export class PlaceService {
-  private readonly PLACE_CATEGORY = [0, 1, 2];
-
   constructor(
     private readonly placeRepository: PlaceRepository,
     @InjectRepository(ReviewImage)
@@ -30,26 +28,21 @@ export class PlaceService {
     private readonly placeBookmarkRepository: Repository<PlaceBookmark>,
   ) {}
 
-  async findPlacesByCategory(
-    category: number,
-    sortBy: string,
-    lat: number,
-    lon: number,
-    last: number,
-  ) {
-    this.validateCategory(category);
-    this.validateCoords(lat, lon);
+  async isPlaceExists(placeId: number) {
+    return this.placeRepository.exist({ where: { placeId } });
+  }
 
+  async findPlaces(sortBy: string, lat: number, lon: number, last: number) {
     let places: PlaceListResponse[] = [];
     switch (sortBy) {
       case SortConditon.DISTANCE:
-        places = await this.placeRepository.findByCategoryOrderByDistance(category, lat, lon, last);
+        places = await this.placeRepository.findAllOrderByDistance(lat, lon, last);
         break;
       case SortConditon.RATING:
-        places = await this.placeRepository.findByCategoryOrderByRating(category, lat, lon, last);
+        places = await this.placeRepository.findAllOrderByRating(lat, lon, last);
         break;
       case SortConditon.REVIEW:
-        places = await this.placeRepository.findByCategoryOrderByReview(category, lat, lon, last);
+        places = await this.placeRepository.findAllOrderByReivew(lat, lon, last);
         break;
       default:
         throw BaseException.of(PlaceResponseCode.INVALID_SORT_CONDITION);
@@ -189,12 +182,6 @@ export class PlaceService {
     }
 
     return await this.placeRepository.findPlaceNews(placeId, last);
-  }
-
-  private validateCategory(category: number) {
-    if (!this.PLACE_CATEGORY.includes(category)) {
-      throw BaseException.of(PlaceResponseCode.INVALID_CATEGORY);
-    }
   }
 
   private validateCoords(lat: number, lon: number) {

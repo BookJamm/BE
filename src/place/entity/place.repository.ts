@@ -16,8 +16,7 @@ export class PlaceRepository extends Repository<Place> {
     super(repository.target, repository.manager, repository.queryRunner);
   }
 
-  public async findByCategoryOrderByDistance(
-    category: number,
+  public async findAllOrderByDistance(
     lat: number,
     lon: number,
     last: number,
@@ -31,7 +30,6 @@ export class PlaceRepository extends Repository<Place> {
       'p.name name',
       'round(p.total_rating, 2) rating',
       'p.review_count reviewCount',
-      'p.category category',
       'p.lat lat',
       'p.lon lon',
       `round(${distanceSql} / 1000, 2) distance`,
@@ -39,7 +37,6 @@ export class PlaceRepository extends Repository<Place> {
       'a.jibun jibun',
     ])
       .leftJoin('p.address', 'a')
-      .where(`p.category = ${category}`)
       .orderBy(distanceSql, 'ASC')
       .take(10);
 
@@ -58,8 +55,7 @@ export class PlaceRepository extends Repository<Place> {
     return (await qb.getRawMany<RawPlace>()).map(place => PlaceListResponse.from(place));
   }
 
-  public async findByCategoryOrderByRating(
-    category: number,
+  public async findAllOrderByRating(
     lat: number,
     lon: number,
     last: number,
@@ -73,7 +69,6 @@ export class PlaceRepository extends Repository<Place> {
       'p.name name',
       'round(p.total_rating, 2) rating',
       'p.review_count reviewCount',
-      'p.category category',
       'p.lat lat',
       'p.lon lon',
       `round(${distanceSql} / 1000, 2) distance`,
@@ -81,7 +76,6 @@ export class PlaceRepository extends Repository<Place> {
       'a.jibun jibun',
     ])
       .leftJoin('p.address', 'a')
-      .where(`p.category = ${category}`)
       .orderBy('p.total_rating', 'DESC')
       .take(10);
 
@@ -100,12 +94,7 @@ export class PlaceRepository extends Repository<Place> {
     return (await qb.getRawMany()).map(place => PlaceListResponse.from(place));
   }
 
-  async findByCategoryOrderByReview(
-    category: number,
-    lat: number,
-    lon: number,
-    last: number,
-  ): Promise<PlaceListResponse[]> {
+  async findAllOrderByReivew(lat: number, lon: number, last: number): Promise<PlaceListResponse[]> {
     const distanceSql = `st_distance_sphere(point(${lon}, ${lat}), point(p.lon, p.lat))`;
 
     const qb = this.repository.createQueryBuilder('p');
@@ -115,7 +104,6 @@ export class PlaceRepository extends Repository<Place> {
       'p.name name',
       'round(p.total_rating, 2) rating',
       'p.review_count reviewCount',
-      'p.category category',
       'p.lat lat',
       'p.lon lon',
       `round(${distanceSql} / 1000, 2) distance`,
@@ -123,7 +111,6 @@ export class PlaceRepository extends Repository<Place> {
       'a.jibun jibun',
     ])
       .leftJoin('p.address', 'a')
-      .where('p.category = :category', { category })
       .orderBy('p.review_count', 'DESC')
       .take(10);
 

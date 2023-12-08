@@ -29,6 +29,9 @@ import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { BaseResponse } from 'src/global/base/base-response';
 import { GlobalResponseCode } from 'src/global/base/global-respose-code';
 import { ExtractPayload } from 'src/global/decorator/extract-payload.decorator';
+import { LatitudeValidationPipe } from 'src/global/validation/latitude-validation.pipe';
+import { LongitudeValidationPipe } from 'src/global/validation/longitutde-validation.pipe';
+import { PlaceExistsValidationPipe } from 'src/global/validation/place-exists-validation.pipe';
 import { ReviewListResponse } from 'src/place-review/dto/review-list-response.dto';
 import { ReviewService } from 'src/place-review/review.service';
 import { CreateReviewRequest } from './dto/request/create-review-request.dto';
@@ -46,7 +49,7 @@ import { PlaceService } from './place.service';
 @ApiBearerAuth()
 export class PlaceController {
   constructor(
-    private readonly placesService: PlaceService,
+    private readonly placeService: PlaceService,
     private readonly reviewService: ReviewService,
     private readonly activityService: ActivityService,
   ) {}
@@ -55,11 +58,6 @@ export class PlaceController {
   @ApiOperation({
     summary: '카테고리로 장소 조회',
     description: '해당하는 카테고리의 장소를 정렬 기준에 맞추어 10개씩 페이징하여 조회한다.',
-  })
-  @ApiQuery({
-    name: 'category',
-    description: '장소 카테고리',
-    enum: [0, 1, 2],
   })
   @ApiQuery({
     name: 'sortBy',
@@ -88,14 +86,13 @@ export class PlaceController {
   })
   @ApiOkResponse({ type: [PlaceListResponse], description: '장소 조회 성공' })
   async findPlacesByCategory(
-    @Query('category') category: number,
     @Query('sortBy') sortBy: string = 'distance',
-    @Query('lat') lat: number,
-    @Query('lon') lon: number,
-    @Query('last') last: number,
+    @Query('lat', LatitudeValidationPipe) lat: number,
+    @Query('lon', LongitudeValidationPipe) lon: number,
+    @Query('last', PlaceExistsValidationPipe) last: number,
   ): Promise<BaseResponse<PlaceListResponse[]>> {
     return new BaseResponse<PlaceListResponse[]>(
-      await this.placesService.findPlacesByCategory(category, sortBy, lat, lon, last),
+      await this.placeService.findPlaces(sortBy, lat, lon, last),
     );
   }
 
@@ -143,7 +140,7 @@ export class PlaceController {
     @Query('last') last: number,
   ): Promise<BaseResponse<PlaceListResponse[]>> {
     return new BaseResponse<PlaceListResponse[]>(
-      await this.placesService.findPlacesByKeyword(keyword, sortBy, lat, lon, last),
+      await this.placeService.findPlacesByKeyword(keyword, sortBy, lat, lon, last),
     );
   }
 
@@ -181,7 +178,7 @@ export class PlaceController {
     @Query('sortBy') sortBy: string = SortConditon.DISTANCE,
   ): Promise<BaseResponse<PlaceListResponse[]>> {
     return new BaseResponse<PlaceListResponse[]>(
-      await this.placesService.findPlacesByBounds(center, tr, sortBy),
+      await this.placeService.findPlacesByBounds(center, tr, sortBy),
     );
   }
 
@@ -194,7 +191,7 @@ export class PlaceController {
     @Param('placeId') placeId: number,
   ): Promise<BaseResponse<PlaceDetailResponse>> {
     return new BaseResponse<PlaceDetailResponse>(
-      await this.placesService.getPlaceDetail(userId, placeId),
+      await this.placeService.getPlaceDetail(userId, placeId),
     );
   }
 
@@ -233,7 +230,7 @@ export class PlaceController {
     @Query('last') last: number,
   ): Promise<BaseResponse<PlaceNewsResponse[]>> {
     return new BaseResponse<PlaceNewsResponse[]>(
-      await this.placesService.getPlaceNews(placeId, last),
+      await this.placeService.getPlaceNews(placeId, last),
     );
   }
 

@@ -50,9 +50,6 @@ export class PlaceListResponse {
   @Type(() => Number)
   placeId: number;
 
-  @ApiProperty({ description: '카테고리, [0: 독립 서점 | 1: 책 놀이터 | 2: 도서관]', example: 1 })
-  category: number;
-
   @ApiProperty({ description: '상호명', example: '서른책방' })
   name: string;
 
