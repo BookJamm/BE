@@ -3,7 +3,7 @@ import { BaseException } from 'src/global/base/base-exception';
 import { BaseResponse } from 'src/global/base/base-response';
 import { ReviewService } from 'src/place-review/review.service';
 import { PlaceFixture } from '../../test/fixture/place-fixture';
-import { PlaceListResponse } from './dto/place-list-response.dto';
+import { PlaceListResponse } from './dto/response/place-list-response.dto';
 import { PlaceResponseCode } from './exception/place-response-code';
 import { PlaceController } from './place.controller';
 import { PlaceService } from './place.service';

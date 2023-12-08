@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { Repository } from 'typeorm';
-import { PlaceListResponse, RawPlace } from '../dto/place-list-response.dto';
-import { PlaceNewsResponse } from '../dto/place-news-response.dto';
+import { PlaceListResponse, RawPlace } from '../dto/response/place-list-response.dto';
+import { PlaceNewsResponse } from '../dto/response/place-news-response.dto';
 import { PlaceNews } from './place-news.entity';
 import { Place } from './place.entity';
 

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Builder } from 'builder-pattern';
 import { BaseException } from 'src/global/base/base-exception';
-import { ActivityListResponse } from 'src/place/dto/activity-list-response.dto';
+import { ActivityListResponse } from 'src/place/dto/response/activity-list-response.dto';
 import { Place } from 'src/place/entity/place.entity';
 import { PlaceResponseCode } from 'src/place/exception/place-response-code';
 import { UserService } from 'src/user/user.service';

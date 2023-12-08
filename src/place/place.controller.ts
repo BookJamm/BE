@@ -31,12 +31,12 @@ import { GlobalResponseCode } from 'src/global/base/global-respose-code';
 import { ExtractPayload } from 'src/global/decorator/extract-payload.decorator';
 import { ReviewListResponse } from 'src/place-review/dto/review-list-response.dto';
 import { ReviewService } from 'src/place-review/review.service';
-import { ActivityListResponse } from './dto/activity-list-response.dto';
-import { CreateReviewRequest } from './dto/create-review-request.dto';
-import { CreateReviewResponse } from './dto/create-review-response.dto';
-import { PlaceDetailResponse } from './dto/place-detail-response.dto';
-import { PlaceListResponse } from './dto/place-list-response.dto';
-import { PlaceNewsResponse } from './dto/place-news-response.dto';
+import { CreateReviewRequest } from './dto/request/create-review-request.dto';
+import { ActivityListResponse } from './dto/response/activity-list-response.dto';
+import { CreateReviewResponse } from './dto/response/create-review-response.dto';
+import { PlaceDetailResponse } from './dto/response/place-detail-response.dto';
+import { PlaceListResponse } from './dto/response/place-list-response.dto';
+import { PlaceNewsResponse } from './dto/response/place-news-response.dto';
 import { SortConditon } from './entity/sort-conditon';
 import { PlaceService } from './place.service';
 
