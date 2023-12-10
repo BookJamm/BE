@@ -21,6 +21,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       database: this.configService.get('db.database', { infer: true }),
       logging: true,
       namingStrategy: new SnakeNamingStrategy(),
+      bigNumberStrings: false,
     };
   }
 }
