@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type, plainToInstance } from 'class-transformer';
+import { Type } from 'class-transformer';
 import { ImageResponse } from 'src/global/dto/image-response.dto';
+import { ReviewImage } from 'src/place-review/entity/review-image.entity';
 
 export type RawPlace = {
-  placeId: string;
+  placeId: number;
   category: number;
   name: string;
   rating: number;
@@ -13,6 +14,8 @@ export type RawPlace = {
   jibun: string;
   lat: string;
   lon: string;
+  images?: ReviewImage[];
+  open?: boolean;
 };
 
 export class AddressResponse {
@@ -45,7 +48,7 @@ export class Coords {
   lon: number;
 }
 
-export class PlaceListResponse {
+export class PlacePreviewResponse {
   @ApiProperty({ description: '장소 아이디', example: 1 })
   @Type(() => Number)
   placeId: number;
@@ -81,13 +84,4 @@ export class PlaceListResponse {
   @ApiProperty({ description: '장소 이미지', type: [ImageResponse] })
   @Type(() => ImageResponse)
   images: ImageResponse[];
-
-  public static from(raw: RawPlace): PlaceListResponse {
-    const { road, jibun, lat, lon, ...rest } = raw;
-    return plainToInstance(PlaceListResponse, {
-      ...rest,
-      address: { road, jibun },
-      coords: { lat: Number(lat), lon: Number(lon) },
-    });
-  }
 }

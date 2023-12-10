@@ -1,4 +1,4 @@
-import { PlaceListResponse } from 'src/place/dto/response/place-list-response.dto';
+import { PlaceListResponse } from 'src/place/dto/response/place-preview-response.dto';
 
 export const PlaceFixture = {
   PLACE_1: {
