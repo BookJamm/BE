@@ -21,8 +21,6 @@ export class ReviewController {
     @ExtractPayload() authorId: number,
     @Param('targetReviewId') targetReviewId: number,
   ): Promise<BaseResponse<DeleteReviewResponse>> {
-    return new BaseResponse<DeleteReviewResponse>(
-      await this.reviewService.delete(authorId, targetReviewId),
-    );
+    return BaseResponse.of(await this.reviewService.delete(authorId, targetReviewId));
   }
 }

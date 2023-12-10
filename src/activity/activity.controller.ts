@@ -24,6 +24,6 @@ export class ActivityController {
     @ExtractPayload() userId: number,
     @Param('activityId') activityId: number,
   ): Promise<BaseResponse<ActivityDetailResponse>> {
-    return new BaseResponse(await this.activityService.getActivityDetail(userId, activityId));
+    return BaseResponse.of(await this.activityService.getActivityDetail(userId, activityId));
   }
 }
