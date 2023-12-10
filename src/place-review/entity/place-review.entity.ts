@@ -2,11 +2,11 @@ import { BaseEntity } from 'src/global/base/base.entity';
 import { Place } from 'src/place/entity/place.entity';
 import { User } from 'src/user/entity/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { ReviewImage } from './review-image.entity';
+import { PlaceReviewImage } from './place-review-image.entity';
 import { ReviewStatus } from './review-status';
 
 @Entity('place_reviews')
-export class Review extends BaseEntity {
+export class PlaceReview extends BaseEntity {
   @PrimaryGeneratedColumn()
   reviewId: number;
 
@@ -30,8 +30,8 @@ export class Review extends BaseEntity {
   @JoinColumn({ name: 'place_id', referencedColumnName: 'placeId' })
   place: Place;
 
-  @OneToMany(() => ReviewImage, reviewImage => reviewImage.reveiw)
-  images: ReviewImage[];
+  @OneToMany(() => PlaceReviewImage, reviewImage => reviewImage.review)
+  images: PlaceReviewImage[];
 
   constructor(visitedAt: Date, contents: string, rating: number, place: Place, author: User) {
     super();
@@ -48,7 +48,7 @@ export class Review extends BaseEntity {
     rating: number,
     place: Place,
     author: User,
-  ): Review {
-    return new Review(visitedAt, contents, rating, place, author);
+  ): PlaceReview {
+    return new PlaceReview(visitedAt, contents, rating, place, author);
   }
 }

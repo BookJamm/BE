@@ -4,14 +4,14 @@ import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { BaseResponse } from 'src/global/base/base-response';
 import { ExtractPayload } from 'src/global/decorator/extract-payload.decorator';
 import { DeleteReviewResponse } from './dto/delete-review-response.dto';
-import { ReviewService } from './review.service';
+import { PlaceReviewService } from './place-review.service';
 
 @Controller('api/place-reviews')
 @UseGuards(JwtAuthGuard)
 @ApiTags('place reviews')
 @ApiBearerAuth()
-export class ReviewController {
-  constructor(private readonly reviewService: ReviewService) {}
+export class PlaceReviewController {
+  constructor(private readonly reviewService: PlaceReviewService) {}
 
   @Delete(':targetReviewId')
   @ApiOperation({ summary: '리뷰 삭제' })
