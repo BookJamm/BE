@@ -1,11 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ImageResponse } from 'src/global/dto/image-response.dto';
-import { ReviewImage } from 'src/place-review/entity/review-image.entity';
+import { PlaceReviewImage } from 'src/place-review/entity/place-review-image.entity';
 
 export type RawPlace = {
   placeId: number;
-  category: number;
   name: string;
   rating: number;
   reviewCount: string;
@@ -14,7 +13,7 @@ export type RawPlace = {
   jibun: string;
   lat: string;
   lon: string;
-  images?: ReviewImage[];
+  images?: PlaceReviewImage[];
   open?: boolean;
 };
 
@@ -24,14 +23,14 @@ export class AddressResponse {
     example: '경기 수원시 영통구 영통로174번길 79 1층 서른책방',
     nullable: true,
   })
-  road: string | null;
+  road?: string;
 
   @ApiProperty({
     description: '지번 주소',
     example: '망포동 345-15',
     nullable: true,
   })
-  jibun: string | null;
+  jibun?: string;
 }
 
 export class Coords {

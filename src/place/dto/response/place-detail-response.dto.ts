@@ -33,10 +33,4 @@ export class PlaceDetailResponse {
     nullable: true,
   })
   open: boolean;
-
-  @ApiProperty({
-    description: '북마크 여부',
-    example: true,
-  })
-  bookmarked: boolean;
 }

@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { Repository } from 'typeorm';
-import { PlaceListResponse, RawPlace } from '../dto/response/place-list-response.dto';
 import { PlaceNewsResponse } from '../dto/response/place-news-response.dto';
+import { RawPlace } from '../dto/response/place-preview-response.dto';
 import { PlaceNews } from './place-news.entity';
 import { Place } from './place.entity';
 
@@ -16,11 +16,7 @@ export class PlaceRepository extends Repository<Place> {
     super(repository.target, repository.manager, repository.queryRunner);
   }
 
-  public async findAllOrderByDistance(
-    lat: number,
-    lon: number,
-    last: number,
-  ): Promise<PlaceListResponse[]> {
+  public async findAllOrderByDistance(lat: number, lon: number, last: number): Promise<RawPlace[]> {
     const distanceSql = `st_distance_sphere(point(${lon}, ${lat}), point(p.lon, p.lat))`;
 
     const qb = this.repository.createQueryBuilder('p');
@@ -52,14 +48,10 @@ export class PlaceRepository extends Repository<Place> {
       }).andWhere(`p.place_id != ${last}`);
     }
 
-    return (await qb.getRawMany<RawPlace>()).map(place => PlaceListResponse.from(place));
+    return await qb.getRawMany<RawPlace>();
   }
 
-  public async findAllOrderByRating(
-    lat: number,
-    lon: number,
-    last: number,
-  ): Promise<PlaceListResponse[]> {
+  public async findAllOrderByRating(lat: number, lon: number, last: number): Promise<RawPlace[]> {
     const distanceSql = `st_distance_sphere(point(${lon}, ${lat}), point(p.lon, p.lat))`;
 
     const qb = this.repository.createQueryBuilder('p');
@@ -91,10 +83,10 @@ export class PlaceRepository extends Repository<Place> {
       }).andWhere(`p.place_id != ${last}`);
     }
 
-    return (await qb.getRawMany()).map(place => PlaceListResponse.from(place));
+    return await qb.getRawMany();
   }
 
-  async findAllOrderByReivew(lat: number, lon: number, last: number): Promise<PlaceListResponse[]> {
+  async findAllOrderByReivew(lat: number, lon: number, last: number): Promise<RawPlace[]> {
     const distanceSql = `st_distance_sphere(point(${lon}, ${lat}), point(p.lon, p.lat))`;
 
     const qb = this.repository.createQueryBuilder('p');
@@ -126,15 +118,15 @@ export class PlaceRepository extends Repository<Place> {
       }).andWhere(`p.place_id != ${last}`);
     }
 
-    return (await qb.getRawMany()).map(place => PlaceListResponse.from(place));
+    return await qb.getRawMany();
   }
 
-  async findByKeywordOrderByDistance(
+  async findAllByKeywordOrderByDistance(
     regexp: string,
     lat: number,
     lon: number,
     last: number,
-  ): Promise<PlaceListResponse[]> {
+  ): Promise<RawPlace[]> {
     const distanceSql = `st_distance_sphere(point(${lon}, ${lat}), point(p.lon, p.lat))`;
 
     const qb = this.repository.createQueryBuilder('p');
@@ -168,14 +160,14 @@ export class PlaceRepository extends Repository<Place> {
       }).andWhere(`p.place_id != ${last}`);
     }
 
-    return (await qb.getRawMany<RawPlace>()).map(place => PlaceListResponse.from(place));
+    return await qb.getRawMany<RawPlace>();
   }
-  async findByKeywordOrderByRating(
+  async findAllByKeywordOrderByRating(
     regexp: string,
     lat: number,
     lon: number,
     last: number,
-  ): Promise<PlaceListResponse[]> {
+  ): Promise<RawPlace[]> {
     const distanceSql = `st_distance_sphere(point(${lon}, ${lat}), point(p.lon, p.lat))`;
 
     const qb = this.repository.createQueryBuilder('p');
@@ -209,14 +201,14 @@ export class PlaceRepository extends Repository<Place> {
       }).andWhere(`p.place_id != ${last}`);
     }
 
-    return (await qb.getRawMany<RawPlace>()).map(place => PlaceListResponse.from(place));
+    return await qb.getRawMany<RawPlace>();
   }
-  async findByKeywordOrderByReview(
+  async findAllByKeywordOrderByReview(
     regexp: string,
     lat: number,
     lon: number,
     last: number,
-  ): Promise<PlaceListResponse[]> {
+  ): Promise<RawPlace[]> {
     const distanceSql = `st_distance_sphere(point(${lon}, ${lat}), point(p.lon, p.lat))`;
 
     const qb = this.repository.createQueryBuilder('p');
@@ -250,10 +242,10 @@ export class PlaceRepository extends Repository<Place> {
       }).andWhere(`p.place_id != ${last}`);
     }
 
-    return (await qb.getRawMany<RawPlace>()).map(place => PlaceListResponse.from(place));
+    return await qb.getRawMany<RawPlace>();
   }
 
-  async findByBoundsOrderByReview(center: number[], tr: number[]): Promise<PlaceListResponse[]> {
+  async findAllByBoundsOrderByReview(center: number[], tr: number[]): Promise<RawPlace[]> {
     const [centerLat, centerLon] = center;
     const [trLat, trLon] = tr;
 
@@ -278,10 +270,10 @@ export class PlaceRepository extends Repository<Place> {
       .where(`${distanceSql} < ${boundsSql}`)
       .orderBy(`p.review_count`, 'DESC');
 
-    return (await qb.getRawMany<RawPlace>()).map(place => PlaceListResponse.from(place));
+    return await qb.getRawMany<RawPlace>();
   }
 
-  async findByBoundsOrderByDistance(center: number[], tr: number[]): Promise<PlaceListResponse[]> {
+  async findAllByBoundsOrderByDistance(center: number[], tr: number[]): Promise<RawPlace[]> {
     const [centerLat, centerLon] = center;
     const [trLat, trLon] = tr;
 
@@ -306,10 +298,10 @@ export class PlaceRepository extends Repository<Place> {
       .where(`${distanceSql} < ${boundsSql}`)
       .orderBy(`${distanceSql}`, 'ASC');
 
-    return (await qb.getRawMany<RawPlace>()).map(place => PlaceListResponse.from(place));
+    return await qb.getRawMany<RawPlace>();
   }
 
-  async findByBoundsOrderByRating(center: number[], tr: number[]): Promise<PlaceListResponse[]> {
+  async findAllByBoundsOrderByRating(center: number[], tr: number[]): Promise<RawPlace[]> {
     const [centerLat, centerLon] = center;
     const [trLat, trLon] = tr;
 
@@ -334,7 +326,7 @@ export class PlaceRepository extends Repository<Place> {
       .where(`${distanceSql} < ${boundsSql}`)
       .orderBy(`p.total_rating`, 'DESC');
 
-    return (await qb.getRawMany<RawPlace>()).map(place => PlaceListResponse.from(place));
+    return await qb.getRawMany<RawPlace>();
   }
 
   async findPlaceNews(placeId: number, last: number): Promise<PlaceNewsResponse[]> {

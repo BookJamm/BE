@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Param,
-  ParseArrayPipe,
   Post,
   Query,
   UploadedFiles,
@@ -32,37 +31,41 @@ import { ExtractPayload } from 'src/global/decorator/extract-payload.decorator';
 import { LatitudeValidationPipe } from 'src/global/validation/latitude-validation.pipe';
 import { LongitudeValidationPipe } from 'src/global/validation/longitutde-validation.pipe';
 import { PlaceExistsValidationPipe } from 'src/global/validation/place-exists-validation.pipe';
+import { PlaceNewsExistsValidationPipe } from 'src/global/validation/place-news-exists-validation.pipe';
+import { PlaceReviewExistsValidationPipe } from 'src/global/validation/place-review-exists-validation.pipe';
+import { SortConditionValidationPipe } from 'src/global/validation/sort-condition-validation.pipe';
 import { ReviewListResponse } from 'src/place-review/dto/review-list-response.dto';
-import { ReviewService } from 'src/place-review/review.service';
+import { PlaceReviewService } from 'src/place-review/place-review.service';
 import { CreateReviewRequest } from './dto/request/create-review-request.dto';
+import { SortConditon } from './dto/request/sort-conditon';
 import { ActivityListResponse } from './dto/response/activity-list-response.dto';
 import { CreateReviewResponse } from './dto/response/create-review-response.dto';
 import { PlaceDetailResponse } from './dto/response/place-detail-response.dto';
-import { PlaceListResponse } from './dto/response/place-list-response.dto';
 import { PlaceNewsResponse } from './dto/response/place-news-response.dto';
-import { SortConditon } from './entity/sort-conditon';
+import { PlacePreviewResponse } from './dto/response/place-preview-response.dto';
+import { PlaceConverter } from './place.converter';
 import { PlaceService } from './place.service';
 
 @Controller('api/places')
 @UseGuards(JwtAuthGuard)
-@ApiTags('places')
+@ApiTags('독립 서점 관련 API')
 @ApiBearerAuth()
 export class PlaceController {
   constructor(
     private readonly placeService: PlaceService,
-    private readonly reviewService: ReviewService,
+    private readonly placeReviewService: PlaceReviewService,
     private readonly activityService: ActivityService,
   ) {}
 
   @Get()
   @ApiOperation({
-    summary: '카테고리로 장소 조회',
-    description: '해당하는 카테고리의 장소를 정렬 기준에 맞추어 10개씩 페이징하여 조회한다.',
+    summary: '독립 서점 조회',
+    description: '해당하는 카테고리의 장소를 정렬 기준에 맞추어 10개씩 페이징하여 조회합니다.',
   })
   @ApiQuery({
     name: 'sortBy',
     description: '정렬 기준',
-    enum: ['distance', 'review', 'rating'],
+    enum: SortConditon,
     required: false,
     schema: {
       default: 'distance',
@@ -70,12 +73,12 @@ export class PlaceController {
   })
   @ApiQuery({
     name: 'lat',
-    description: '현재 위치 위도',
+    description: '현재 위치 위도 (-90 ~ 90, 소수 여섯째 자리까지만)',
     example: 37.234663,
   })
   @ApiQuery({
     name: 'lon',
-    description: '현재 위치 경도',
+    description: '현재 위치 경도 (-180 ~ 180, 소수 여섯째 자리까지만)',
     example: 127.061425,
   })
   @ApiQuery({
@@ -84,16 +87,16 @@ export class PlaceController {
     example: 4,
     required: false,
   })
-  @ApiOkResponse({ type: [PlaceListResponse], description: '장소 조회 성공' })
-  async findPlacesByCategory(
-    @Query('sortBy') sortBy: string = 'distance',
+  @ApiOkResponse({ type: [PlacePreviewResponse], description: '장소 조회 성공' })
+  async findPlaces(
+    @Query('sortBy', SortConditionValidationPipe) sortBy: string = SortConditon.DISTANCE,
     @Query('lat', LatitudeValidationPipe) lat: number,
     @Query('lon', LongitudeValidationPipe) lon: number,
     @Query('last', PlaceExistsValidationPipe) last: number,
-  ): Promise<BaseResponse<PlaceListResponse[]>> {
-    return new BaseResponse<PlaceListResponse[]>(
-      await this.placeService.findPlaces(sortBy, lat, lon, last),
-    );
+  ): Promise<BaseResponse<PlacePreviewResponse[]>> {
+    const places = await this.placeService.findPlaces(sortBy, lat, lon, last);
+
+    return BaseResponse.of(PlaceConverter.toPlacePreviewListResponse(places));
   }
 
   @Get('search')
@@ -110,7 +113,6 @@ export class PlaceController {
     name: 'sortBy',
     description: '정렬 기준',
     enum: SortConditon,
-    example: 'review',
     required: false,
     schema: {
       default: 'distance',
@@ -118,12 +120,12 @@ export class PlaceController {
   })
   @ApiQuery({
     name: 'lat',
-    description: '현재 위치 위도',
+    description: '현재 위치 위도 ([-90, 90], 소수 여섯째 자리까지만)',
     example: 37.238293,
   })
   @ApiQuery({
     name: 'lon',
-    description: '현재 위치 경도',
+    description: '현재 위치 경도 ([-180, 180], 소수 여섯째 자리까지만)',
     example: 127.075852,
   })
   @ApiQuery({
@@ -131,17 +133,17 @@ export class PlaceController {
     description: '마지막으로 본 장소의 아이디 (페이징 용)',
     example: 5,
   })
-  @ApiOkResponse({ type: [PlaceListResponse], description: '장소 검색 성공' })
+  @ApiOkResponse({ type: [PlacePreviewResponse], description: '장소 검색 성공' })
   async findPlacesByKeyword(
     @Query('keyword') keyword: string,
-    @Query('sortBy') sortBy: string,
-    @Query('lat') lat: number,
-    @Query('lon') lon: number,
-    @Query('last') last: number,
-  ): Promise<BaseResponse<PlaceListResponse[]>> {
-    return new BaseResponse<PlaceListResponse[]>(
-      await this.placeService.findPlacesByKeyword(keyword, sortBy, lat, lon, last),
-    );
+    @Query('sortBy', SortConditionValidationPipe) sortBy: string,
+    @Query('lat', LatitudeValidationPipe) lat: number,
+    @Query('lon', LongitudeValidationPipe) lon: number,
+    @Query('last', PlaceExistsValidationPipe) last: number,
+  ): Promise<BaseResponse<PlacePreviewResponse[]>> {
+    const places = await this.placeService.findPlacesByKeyword(keyword, sortBy, lat, lon, last);
+
+    return BaseResponse.of(PlaceConverter.toPlacePreviewListResponse(places));
   }
 
   @Get('maps')
@@ -150,14 +152,24 @@ export class PlaceController {
     description: '현재 보고 있는 지도의 범위 내에서 장소를 조회합니다.',
   })
   @ApiQuery({
-    name: 'center',
-    description: '지도에서 중앙점의 좌표 ⚠️ 반드시 {위도}, {경도} 형식으로 보낼 것',
-    example: '37.547689, 126.942383',
+    name: 'centerLat',
+    description: '지도 중앙의 위도',
+    example: '37.547689',
   })
   @ApiQuery({
-    name: 'tr',
-    description: '지도에서 우상단의 좌표 ⚠️ 반드시 {위도}, {경도} 형식으로 보낼 것',
-    example: '37.572440, 126.885726',
+    name: 'centerLon',
+    description: '지도 중앙의 경도',
+    example: '126.942383',
+  })
+  @ApiQuery({
+    name: 'topRightLat',
+    description: '지도에서 우상단의 위도',
+    example: '37.572440',
+  })
+  @ApiQuery({
+    name: 'topRightLon',
+    description: '지도에서 좌상단의 경도',
+    example: '126.885726',
   })
   @ApiQuery({
     name: 'sortBy',
@@ -170,16 +182,22 @@ export class PlaceController {
   })
   @ApiOkResponse({
     description: '조회 성공',
-    type: [PlaceListResponse],
+    type: [PlacePreviewResponse],
   })
   async findPlacesByBounds(
-    @Query('center', new ParseArrayPipe({ items: Number, separator: ',' })) center: number[],
-    @Query('tr', new ParseArrayPipe({ items: Number, separator: ',' })) tr: number[],
-    @Query('sortBy') sortBy: string = SortConditon.DISTANCE,
-  ): Promise<BaseResponse<PlaceListResponse[]>> {
-    return new BaseResponse<PlaceListResponse[]>(
-      await this.placeService.findPlacesByBounds(center, tr, sortBy),
+    @Query('centerLat', LatitudeValidationPipe) centerLat: number,
+    @Query('centerLon', LongitudeValidationPipe) centerLon: number,
+    @Query('topRightLat', LatitudeValidationPipe) topRightLat: number,
+    @Query('topRightLon', LongitudeValidationPipe) topRightLon: number,
+    @Query('sortBy', SortConditionValidationPipe) sortBy: string = SortConditon.DISTANCE,
+  ): Promise<BaseResponse<PlacePreviewResponse[]>> {
+    const places = await this.placeService.findPlacesByBounds(
+      [centerLat, centerLon],
+      [topRightLat, topRightLon],
+      sortBy,
     );
+
+    return BaseResponse.of(PlaceConverter.toPlacePreviewListResponse(places));
   }
 
   @Get(':placeId')
@@ -188,11 +206,11 @@ export class PlaceController {
   @ApiOkResponse({ type: PlaceDetailResponse })
   async getPlaceDetail(
     @ExtractPayload() userId: number,
-    @Param('placeId') placeId: number,
+    @Param('placeId', PlaceExistsValidationPipe) placeId: number,
   ): Promise<BaseResponse<PlaceDetailResponse>> {
-    return new BaseResponse<PlaceDetailResponse>(
-      await this.placeService.getPlaceDetail(userId, placeId),
-    );
+    const place = await this.placeService.getPlaceDetail(placeId);
+
+    return BaseResponse.of(await PlaceConverter.toPlaceDetailResponse(place));
   }
 
   @Get(':placeId/reviews')
@@ -209,12 +227,11 @@ export class PlaceController {
   })
   async findPlaceReviews(
     @ExtractPayload() userId: number,
-    @Param('placeId') placeId: number,
-    @Query('last') last: number,
+    @Param('placeId', PlaceExistsValidationPipe) placeId: number,
+    @Query('last', PlaceReviewExistsValidationPipe) last: number,
   ): Promise<BaseResponse<ReviewListResponse[]>> {
-    return new BaseResponse<ReviewListResponse[]>(
-      await this.reviewService.findPlaceReviews(userId, placeId, last),
-    );
+    // return BaseResponse.of(await this.reviewService.findPlaceReviews(userId, placeId, last));
+    return null;
   }
 
   @Get(':placeId/news')
@@ -226,12 +243,12 @@ export class PlaceController {
   @ApiQuery({ name: 'last', description: '마지막으로 본 소식의 아이디 (페이징 용)' })
   @ApiOkResponse({ type: [PlaceNewsResponse] })
   async findPlaceNews(
-    @Param('placeId') placeId: number,
-    @Query('last') last: number,
+    @Param('placeId', PlaceExistsValidationPipe) placeId: number,
+    @Query('last', PlaceNewsExistsValidationPipe) last: number,
   ): Promise<BaseResponse<PlaceNewsResponse[]>> {
-    return new BaseResponse<PlaceNewsResponse[]>(
-      await this.placeService.getPlaceNews(placeId, last),
-    );
+    const places = await this.placeService.getPlaceNews(placeId, last);
+
+    return BaseResponse.of(PlaceConverter.toPlaceNewsListResponse(places));
   }
 
   @Post(':placeId/reviews')
@@ -266,8 +283,8 @@ export class PlaceController {
     @Body() reqeust: CreateReviewRequest,
     @UploadedFiles() reviewImages: Express.Multer.File[],
   ): Promise<BaseResponse<CreateReviewResponse>> {
-    return new BaseResponse(
-      await this.reviewService.create(authorId, placeId, reqeust, reviewImages),
+    return BaseResponse.of(
+      await this.placeReviewService.createReview(authorId, placeId, reqeust, reviewImages),
       GlobalResponseCode.CREATED,
     );
   }
@@ -281,8 +298,6 @@ export class PlaceController {
     @Param('placeId') placeId: number,
     @Query('last') last: number,
   ): Promise<BaseResponse<ActivityListResponse[]>> {
-    return new BaseResponse<ActivityListResponse[]>(
-      await this.activityService.findPlaceActivities(placeId, last),
-    );
+    return BaseResponse.of(await this.activityService.findPlaceActivities(placeId, last));
   }
 }
