@@ -34,7 +34,7 @@ import { PlaceExistsValidationPipe } from 'src/global/validation/place-exists-va
 import { PlaceNewsExistsValidationPipe } from 'src/global/validation/place-news-exists-validation.pipe';
 import { PlaceReviewExistsValidationPipe } from 'src/global/validation/place-review-exists-validation.pipe';
 import { SortConditionValidationPipe } from 'src/global/validation/sort-condition-validation.pipe';
-import { ReviewListResponse } from 'src/place-review/dto/review-list-response.dto';
+import { PlaceReviewResponse } from 'src/place-review/dto/place-review-response.dto';
 import { PlaceReviewService } from 'src/place-review/place-review.service';
 import { CreateReviewRequest } from './dto/request/create-review-request.dto';
 import { SortConditon } from './dto/request/sort-conditon';
@@ -218,7 +218,7 @@ export class PlaceController {
     summary: '장소 리뷰 조회',
     description: '해당 장소의 리뷰를 최신순으로 10개씩 페이징하여 조회한다.',
   })
-  @ApiOkResponse({ description: '장소 리뷰 조회 성공', type: [ReviewListResponse] })
+  @ApiOkResponse({ description: '장소 리뷰 조회 성공', type: [PlaceReviewResponse] })
   @ApiParam({ name: 'placeId', description: '리뷰를 조회할 장소의 아이디' })
   @ApiQuery({
     name: 'last',
@@ -229,9 +229,10 @@ export class PlaceController {
     @ExtractPayload() userId: number,
     @Param('placeId', PlaceExistsValidationPipe) placeId: number,
     @Query('last', PlaceReviewExistsValidationPipe) last: number,
-  ): Promise<BaseResponse<ReviewListResponse[]>> {
-    // return BaseResponse.of(await this.reviewService.findPlaceReviews(userId, placeId, last));
-    return null;
+  ): Promise<BaseResponse<PlaceReviewResponse[]>> {
+    const reviews = await this.placeReviewService.findPlaceReviews(userId, placeId, last);
+
+    return BaseResponse.of(PlaceConverter.toPlaceReviewResponseList(reviews));
   }
 
   @Get(':placeId/news')

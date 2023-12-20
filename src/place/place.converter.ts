@@ -1,5 +1,9 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Builder } from 'builder-pattern';
+import { AuthorResponse } from 'src/global/dto/base-review-response.dto';
+import { PlaceReviewResponse } from 'src/place-review/dto/place-review-response.dto';
+import { PlaceReview } from 'src/place-review/entity/place-review.entity';
+import { User } from 'src/user/entity/user.entity';
 import { PlaceDetailResponse } from './dto/response/place-detail-response.dto';
 import { PlaceNewsResponse } from './dto/response/place-news-response.dto';
 import { PlacePreviewResponse, RawPlace } from './dto/response/place-preview-response.dto';
@@ -64,6 +68,31 @@ export class PlaceConverter implements OnModuleInit {
       .images(queryPlace.images.map(image => ({ id: image.id, imageUrl: image.imageUrl })))
       .rating(queryPlace.rating)
       .reviewCount(parseFloat(queryPlace.reviewCount))
+      .build();
+  }
+
+  public static toPlaceReviewResponseList(reviews: PlaceReview[]): PlaceReviewResponse[] {
+    return reviews.map(review => this.toPlaceReviewResponse(review));
+  }
+
+  private static toPlaceReviewResponse(review: PlaceReview): PlaceReviewResponse {
+    return Builder<PlaceReviewResponse>()
+      .reviewId(review.reviewId)
+      .author(this.toAuthorResponse(review.author))
+      .contents(review.contents)
+      .createdAt(review.createdAt)
+      .images(review.images.map(image => ({ id: image.id, imageUrl: image.imageUrl })))
+      .rating(review.rating)
+      .updatedAt(review.updatedAt)
+      .visitedAt(review.visitedAt)
+      .build();
+  }
+
+  private static toAuthorResponse(author: User): AuthorResponse {
+    return Builder<AuthorResponse>()
+      .userId(author.userId)
+      .username(author.username)
+      .profileImage(author.profileImage)
       .build();
   }
 }
