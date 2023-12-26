@@ -25,9 +25,7 @@ export class AuthController {
   })
   @ApiOkResponse({ type: JwtResponse, description: '로그인 성공' })
   async login(@Body() requst: LoginRequest): Promise<BaseResponse<JwtResponse>> {
-    return new BaseResponse<JwtResponse>(
-      await this.authService.login(requst.email, requst.password),
-    );
+    return BaseResponse.of(await this.authService.login(requst.email, requst.password));
   }
 
   @Get('reissue')
@@ -43,7 +41,7 @@ export class AuthController {
     @ExtractPayload() userId: number,
     @ExtractToken() refreshToken: string,
   ): Promise<BaseResponse<JwtResponse>> {
-    return new BaseResponse<JwtResponse>(await this.authService.reissueToken(userId, refreshToken));
+    return BaseResponse.of(await this.authService.reissueToken(userId, refreshToken));
   }
 
   @Post('email-check')
@@ -53,7 +51,7 @@ export class AuthController {
   async checkEmailTaken(
     @Body() reqeust: EmailCheckRequest,
   ): Promise<BaseResponse<EmailCheckResponse>> {
-    return new BaseResponse<EmailCheckResponse>({
+    return BaseResponse.of({
       availabe: await this.authService.checkEmailTaken(reqeust.email),
     });
   }

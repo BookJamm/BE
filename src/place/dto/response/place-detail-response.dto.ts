@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ImageResponse } from 'src/global/dto/image-response.dto';
-import { AddressResponse } from './place-list-response.dto';
+import { AddressResponse } from './place-preview-response.dto';
 
 export class PlaceDetailResponse {
   @ApiProperty({ description: '장소 아이디', example: 1 })
@@ -33,10 +33,4 @@ export class PlaceDetailResponse {
     nullable: true,
   })
   open: boolean;
-
-  @ApiProperty({
-    description: '북마크 여부',
-    example: true,
-  })
-  bookmarked: boolean;
 }

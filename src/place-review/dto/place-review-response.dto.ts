@@ -1,4 +1,4 @@
-import { BaseReviewListResponse } from 'src/global/dto/base-review-response.dto';
+import { BaseReviewResponse } from 'src/global/dto/base-review-response.dto';
 
 export type RawReview = {
   reviewId: string;
@@ -9,4 +9,4 @@ export type RawReview = {
   profileImage: string;
 };
 
-export class ReviewListResponse extends BaseReviewListResponse {}
+export class PlaceReviewResponse extends BaseReviewResponse {}

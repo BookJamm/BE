@@ -53,6 +53,6 @@ export class UserController {
     @UploadedFile() profileImage: Express.Multer.File,
   ): Promise<BaseResponse<SignUpResponse>> {
     const newUserId: number = await this.userService.create(await reqeust.toUser(), profileImage);
-    return new BaseResponse({ userId: newUserId }, GlobalResponseCode.CREATED);
+    return BaseResponse.of({ userId: newUserId }, GlobalResponseCode.CREATED);
   }
 }

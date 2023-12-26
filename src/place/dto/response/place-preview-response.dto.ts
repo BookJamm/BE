@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type, plainToInstance } from 'class-transformer';
+import { Type } from 'class-transformer';
 import { ImageResponse } from 'src/global/dto/image-response.dto';
+import { PlaceReviewImage } from 'src/place-review/entity/place-review-image.entity';
 
 export type RawPlace = {
-  placeId: string;
-  category: number;
+  placeId: number;
   name: string;
   rating: number;
   reviewCount: string;
@@ -13,6 +13,8 @@ export type RawPlace = {
   jibun: string;
   lat: string;
   lon: string;
+  images?: PlaceReviewImage[];
+  open?: boolean;
 };
 
 export class AddressResponse {
@@ -21,14 +23,14 @@ export class AddressResponse {
     example: '경기 수원시 영통구 영통로174번길 79 1층 서른책방',
     nullable: true,
   })
-  road: string | null;
+  road?: string;
 
   @ApiProperty({
     description: '지번 주소',
     example: '망포동 345-15',
     nullable: true,
   })
-  jibun: string | null;
+  jibun?: string;
 }
 
 export class Coords {
@@ -45,13 +47,10 @@ export class Coords {
   lon: number;
 }
 
-export class PlaceListResponse {
+export class PlacePreviewResponse {
   @ApiProperty({ description: '장소 아이디', example: 1 })
   @Type(() => Number)
   placeId: number;
-
-  @ApiProperty({ description: '카테고리, [0: 독립 서점 | 1: 책 놀이터 | 2: 도서관]', example: 1 })
-  category: number;
 
   @ApiProperty({ description: '상호명', example: '서른책방' })
   name: string;
@@ -84,13 +83,4 @@ export class PlaceListResponse {
   @ApiProperty({ description: '장소 이미지', type: [ImageResponse] })
   @Type(() => ImageResponse)
   images: ImageResponse[];
-
-  public static from(raw: RawPlace): PlaceListResponse {
-    const { road, jibun, lat, lon, ...rest } = raw;
-    return plainToInstance(PlaceListResponse, {
-      ...rest,
-      address: { road, jibun },
-      coords: { lat: Number(lat), lon: Number(lon) },
-    });
-  }
 }
