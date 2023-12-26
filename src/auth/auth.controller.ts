@@ -8,6 +8,7 @@ import { EmailCheckRequest } from './dto/email-check-request.dto';
 import { EmailCheckResponse } from './dto/email-check-response.dto';
 import { JwtResponse } from './dto/jwt-response.dto';
 import { KakaoOAuthRequest } from './dto/kakao-oauth-request.dto';
+import { KakaoOAuthResponse } from './dto/kakao-oauth-response.dto';
 import { LoginRequest } from './dto/login-request.dto';
 import { JwtAuthGuard } from './guard/auth.guard';
 
@@ -58,6 +59,12 @@ export class AuthController {
   }
 
   @Post('login/kakao')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: KakaoOAuthResponse, description: '로그인 성공' })
+  @ApiOperation({
+    summary: '카카오 로그인',
+    description: '카카오 로그인을 진행합니다. isLogin이 false면 회원가입입니다.',
+  })
   async kakaoOAuth(@Body() request: KakaoOAuthRequest) {
     return this.authService.kakaoOAuth(request.accessToken);
   }
