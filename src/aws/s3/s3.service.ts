@@ -88,7 +88,7 @@ export class S3Service {
     return `${dir}/${uuid}_${originalFileName}`;
   }
 
-  getKeyFromUrl(url: string) {
+  private getKeyFromUrl(url: string) {
     return url.split(this.S3_BASE_URL)[1];
   }
 }
