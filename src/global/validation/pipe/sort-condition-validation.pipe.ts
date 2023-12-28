@@ -1,5 +1,5 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
-import { SortConditon } from 'src/place/entity/sort-conditon';
+import { SortConditon } from 'src/place/dto/request/sort-conditon';
 import { PlaceResponseCode } from 'src/place/exception/place-response-code';
 import { BaseException } from '../../base/base-exception';
 
