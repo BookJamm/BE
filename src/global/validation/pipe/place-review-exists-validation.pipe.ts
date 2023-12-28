@@ -1,5 +1,5 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
-import { ReviewResponseCode } from 'src/place-review/exception/review-response-code';
+import { PlaceReviewResponseCode } from 'src/place-review/exception/place-review-response-code';
 import { PlaceReviewService } from 'src/place-review/place-review.service';
 import { BaseException } from '../../base/base-exception';
 
@@ -12,7 +12,7 @@ export class PlaceReviewExistsValidationPipe implements PipeTransform {
       const isValid = await this.reviewService.isPlaceReviewExists(value);
 
       if (!isValid) {
-        throw BaseException.of(ReviewResponseCode.REVIEW_NOT_FOUND);
+        throw BaseException.of(PlaceReviewResponseCode.REVIEW_NOT_FOUND);
       }
     }
 

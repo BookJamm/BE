@@ -12,7 +12,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { PlaceReviewImage } from './place-review-image.entity';
-import { ReviewStatus } from './review-status';
+import { PlaceReviewStatus } from './place-review-status';
 
 @Entity('place_reviews')
 export class PlaceReview extends BaseEntity {
@@ -25,8 +25,8 @@ export class PlaceReview extends BaseEntity {
   @Column()
   contents: string;
 
-  @Column({ enum: ReviewStatus })
-  status: ReviewStatus;
+  @Column({ enum: PlaceReviewStatus })
+  status: PlaceReviewStatus;
 
   @Column({ type: 'float' })
   rating: number;
@@ -48,6 +48,9 @@ export class PlaceReview extends BaseEntity {
   @JoinColumn({ name: 'place_id', referencedColumnName: 'placeId' })
   place: Place;
 
-  @OneToMany(() => PlaceReviewImage, reviewImage => reviewImage.review)
+  @OneToMany(() => PlaceReviewImage, reviewImage => reviewImage.review, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   images: PlaceReviewImage[];
 }
