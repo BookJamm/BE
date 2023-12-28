@@ -23,6 +23,15 @@ export class CreatePlaceReviewRequest {
   readonly visitedAt: Date;
 
   @ApiProperty({
+    description: '참여한 활동의 아이디',
+    example: 1,
+    required: false,
+  })
+  @Type(() => Number)
+  @IsNumber(undefined, { message: '참여한 활동 아이디는 정수여야 합니다.' })
+  readonly activityId?: number;
+
+  @ApiProperty({
     description: '리뷰 내용',
     example: '즐거운 독서 생활',
   })
@@ -43,10 +52,10 @@ export class CreatePlaceReviewRequest {
   readonly rating: number;
 
   @ApiProperty({
-    description: '댓글 비허용 여부',
+    description: '댓글 허용 여부',
     example: true,
   })
   @Type(() => Boolean)
   @IsBoolean({ message: '댓글 비허용 여부는 boolean 값이어야 합니다.' })
-  readonly isCommentNotAllowed: boolean;
+  readonly commentAllowed: boolean;
 }

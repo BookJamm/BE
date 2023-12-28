@@ -28,18 +28,18 @@ import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { BaseResponse } from 'src/global/base/base-response';
 import { GlobalResponseCode } from 'src/global/base/global-respose-code';
 import { ExtractPayload } from 'src/global/decorator/extract-payload.decorator';
-import { LatitudeValidationPipe } from 'src/global/validation/latitude-validation.pipe';
-import { LongitudeValidationPipe } from 'src/global/validation/longitutde-validation.pipe';
-import { PlaceExistsValidationPipe } from 'src/global/validation/place-exists-validation.pipe';
-import { PlaceNewsExistsValidationPipe } from 'src/global/validation/place-news-exists-validation.pipe';
-import { PlaceReviewExistsValidationPipe } from 'src/global/validation/place-review-exists-validation.pipe';
-import { SortConditionValidationPipe } from 'src/global/validation/sort-condition-validation.pipe';
+import { LatitudeValidationPipe } from 'src/global/validation/pipe/latitude-validation.pipe';
+import { LongitudeValidationPipe } from 'src/global/validation/pipe/longitutde-validation.pipe';
+import { PlaceExistsValidationPipe } from 'src/global/validation/pipe/place-exists-validation.pipe';
+import { PlaceNewsExistsValidationPipe } from 'src/global/validation/pipe/place-news-exists-validation.pipe';
+import { PlaceReviewExistsValidationPipe } from 'src/global/validation/pipe/place-review-exists-validation.pipe';
+import { SortConditionValidationPipe } from 'src/global/validation/pipe/sort-condition-validation.pipe';
 import { PlaceReviewResponse } from 'src/place-review/dto/place-review-response.dto';
 import { PlaceReviewService } from 'src/place-review/place-review.service';
-import { CreateReviewRequest } from './dto/request/create-review-request.dto';
+import { CreatePlaceReviewRequest } from './dto/request/create-place-review-request.dto';
 import { SortConditon } from './dto/request/sort-conditon';
 import { ActivityListResponse } from './dto/response/activity-list-response.dto';
-import { CreateReviewResponse } from './dto/response/create-review-response.dto';
+import { CreatePlaceReviewResponse } from './dto/response/create-place-review-response.dto';
 import { PlaceDetailResponse } from './dto/response/place-detail-response.dto';
 import { PlaceNewsResponse } from './dto/response/place-news-response.dto';
 import { PlacePreviewResponse } from './dto/response/place-preview-response.dto';
@@ -255,7 +255,7 @@ export class PlaceController {
   @Post(':placeId/reviews')
   @UseInterceptors(FilesInterceptor('images', 5))
   @ApiConsumes('multipart/form-data')
-  @ApiExtraModels(CreateReviewRequest)
+  @ApiExtraModels(CreatePlaceReviewRequest)
   @ApiBody({
     schema: {
       allOf: [
@@ -268,7 +268,7 @@ export class PlaceController {
             },
           },
         },
-        { $ref: getSchemaPath(CreateReviewRequest) },
+        { $ref: getSchemaPath(CreatePlaceReviewRequest) },
       ],
     },
   })
@@ -277,15 +277,17 @@ export class PlaceController {
     description:
       '해당 장소에 리뷰를 등록한다. 사진은 5장까지 업로드 가능. ⚠️ multipart/form-data로 요청',
   })
-  @ApiCreatedResponse({ description: '리뷰 등록 성공', type: CreateReviewResponse })
+  @ApiCreatedResponse({ description: '리뷰 등록 성공', type: CreatePlaceReviewResponse })
   async createReview(
     @ExtractPayload() authorId: number,
-    @Param('placeId') placeId: number,
-    @Body() reqeust: CreateReviewRequest,
+    @Param('placeId', PlaceExistsValidationPipe) placeId: number,
+    @Body() reqeust: CreatePlaceReviewRequest,
     @UploadedFiles() reviewImages: Express.Multer.File[],
-  ): Promise<BaseResponse<CreateReviewResponse>> {
+  ): Promise<BaseResponse<CreatePlaceReviewResponse>> {
+    const review = await this.placeReviewService.create(authorId, placeId, reqeust, reviewImages);
+
     return BaseResponse.of(
-      await this.placeReviewService.createReview(authorId, placeId, reqeust, reviewImages),
+      PlaceConverter.toCreatePlaceReviewResponse(review),
       GlobalResponseCode.CREATED,
     );
   }

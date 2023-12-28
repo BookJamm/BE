@@ -1,7 +1,16 @@
+import { Activity } from 'src/activity/entity/activity.entity';
 import { BaseEntity } from 'src/global/base/base.entity';
 import { Place } from 'src/place/entity/place.entity';
 import { User } from 'src/user/entity/user.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { PlaceReviewImage } from './place-review-image.entity';
 import { ReviewStatus } from './review-status';
 
@@ -22,9 +31,18 @@ export class PlaceReview extends BaseEntity {
   @Column({ type: 'float' })
   rating: number;
 
+  @Column({ type: 'tinyint' })
+  commentAllowed: boolean;
+
   @ManyToOne(() => User, author => author.userId)
   @JoinColumn({ name: 'author', referencedColumnName: 'userId' })
   author: User;
+
+  @OneToOne(() => Activity, activity => activity.activityId, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'activity_id', referencedColumnName: 'activityId' })
+  activity: Activity;
 
   @ManyToOne(() => Place, place => place.placeId)
   @JoinColumn({ name: 'place_id', referencedColumnName: 'placeId' })
@@ -32,23 +50,4 @@ export class PlaceReview extends BaseEntity {
 
   @OneToMany(() => PlaceReviewImage, reviewImage => reviewImage.review)
   images: PlaceReviewImage[];
-
-  constructor(visitedAt: Date, contents: string, rating: number, place: Place, author: User) {
-    super();
-    this.visitedAt = visitedAt;
-    this.contents = contents;
-    this.rating = rating;
-    this.place = place;
-    this.author = author;
-  }
-
-  public static createReview(
-    visitedAt: Date,
-    contents: string,
-    rating: number,
-    place: Place,
-    author: User,
-  ): PlaceReview {
-    return new PlaceReview(visitedAt, contents, rating, place, author);
-  }
 }

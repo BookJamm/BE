@@ -4,6 +4,7 @@ import { AuthorResponse } from 'src/global/dto/base-review-response.dto';
 import { PlaceReviewResponse } from 'src/place-review/dto/place-review-response.dto';
 import { PlaceReview } from 'src/place-review/entity/place-review.entity';
 import { User } from 'src/user/entity/user.entity';
+import { CreatePlaceReviewResponse } from './dto/response/create-place-review-response.dto';
 import { PlaceDetailResponse } from './dto/response/place-detail-response.dto';
 import { PlaceNewsResponse } from './dto/response/place-news-response.dto';
 import { PlacePreviewResponse, RawPlace } from './dto/response/place-preview-response.dto';
@@ -73,6 +74,10 @@ export class PlaceConverter implements OnModuleInit {
 
   public static toPlaceReviewResponseList(reviews: PlaceReview[]): PlaceReviewResponse[] {
     return reviews.map(review => this.toPlaceReviewResponse(review));
+  }
+
+  public static toCreatePlaceReviewResponse(review: PlaceReview): CreatePlaceReviewResponse {
+    return Builder<CreatePlaceReviewResponse>().reviewId(review.reviewId).build();
   }
 
   private static toPlaceReviewResponse(review: PlaceReview): PlaceReviewResponse {
