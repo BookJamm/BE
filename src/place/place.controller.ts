@@ -253,7 +253,7 @@ export class PlaceController {
   }
 
   @Post(':placeId/reviews')
-  @UseInterceptors(FilesInterceptor('images', 5))
+  @UseInterceptors(FilesInterceptor('images', 3))
   @ApiConsumes('multipart/form-data')
   @ApiExtraModels(CreatePlaceReviewRequest)
   @ApiBody({
@@ -263,8 +263,12 @@ export class PlaceController {
           type: 'object',
           properties: {
             images: {
-              type: 'string',
-              format: 'binary',
+              type: 'array',
+              items: {
+                type: 'string',
+                format: 'binary',
+              },
+              maxItems: 3,
             },
           },
         },
@@ -275,7 +279,7 @@ export class PlaceController {
   @ApiOperation({
     summary: '리뷰 등록',
     description:
-      '해당 장소에 리뷰를 등록한다. 사진은 5장까지 업로드 가능. ⚠️ multipart/form-data로 요청',
+      '해당 장소에 리뷰를 등록한다. 사진은 3장까지 업로드 가능. ⚠️ multipart/form-data로 요청',
   })
   @ApiCreatedResponse({ description: '리뷰 등록 성공', type: CreatePlaceReviewResponse })
   async createReview(
