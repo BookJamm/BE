@@ -13,15 +13,18 @@ import { S3ResponseCode } from './exception/s3-response-code';
 @Injectable()
 export class S3Service {
   private readonly s3: S3Client;
-  private readonly S3_BASE_URL = 'https://bookjam.s3.ap-northeast-2.amazonaws.com/';
+  private readonly S3_BASE_URL: string;
   private readonly DIR = {
-    REVIEW: 'review',
+    PLACE_REVIEW: 'place-review',
     PROFILE: 'profile',
   };
   private readonly BUCKET: string;
   private readonly logger: Logger = new Logger(S3Service.name);
 
   constructor(private readonly configService: ConfigService) {
+    this.BUCKET = configService.get('s3.bucket', { infer: true });
+    const REGION = configService.get('s3.region', { infer: true });
+
     const options: S3ClientConfig = {
       credentials: {
         accessKeyId: configService.get('s3.accessKey', { infer: true }),
@@ -31,11 +34,11 @@ export class S3Service {
     };
 
     this.s3 = new S3Client(options);
-    this.BUCKET = configService.get('s3.bucket', { infer: true });
+    this.S3_BASE_URL = `https://${this.BUCKET}.s3.${REGION}.amazonaws.com/`;
   }
 
-  async uploadReviewImageFile(file: Express.Multer.File) {
-    return this.uploadFile(this.DIR.REVIEW, file);
+  async uploadPlaceReviewImageFile(file: Express.Multer.File) {
+    return this.uploadFile(this.DIR.PLACE_REVIEW, file);
   }
 
   async uploadProfileImageFile(file: Express.Multer.File) {
@@ -85,7 +88,7 @@ export class S3Service {
     return `${dir}/${uuid}_${originalFileName}`;
   }
 
-  getKeyFromUrl(url: string) {
+  private getKeyFromUrl(url: string) {
     return url.split(this.S3_BASE_URL)[1];
   }
 }

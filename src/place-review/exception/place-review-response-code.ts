@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { ResponseCode } from 'src/global/base/response-code';
 
-export const ReviewResponseCode = {
+export const PlaceReviewResponseCode = {
   NOT_OWNER: new ResponseCode(
     HttpStatus.FORBIDDEN,
     'REVIEW_002',

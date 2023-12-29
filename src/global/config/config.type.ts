@@ -5,6 +5,7 @@ export type DatabaseConfig = {
   database?: string;
   username?: string;
   maxConnections: number;
+  synchronize?: boolean;
 };
 
 export type AuthConfig = {
@@ -17,6 +18,7 @@ export type S3Config = {
   accessKey: string;
   secretAccessKey: string;
   bucket: string;
+  region: string;
 };
 
 export type Config = {

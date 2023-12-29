@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Param,
-  ParseArrayPipe,
   Post,
   Query,
   UploadedFiles,
@@ -29,42 +28,44 @@ import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { BaseResponse } from 'src/global/base/base-response';
 import { GlobalResponseCode } from 'src/global/base/global-respose-code';
 import { ExtractPayload } from 'src/global/decorator/extract-payload.decorator';
-import { ReviewListResponse } from 'src/place-review/dto/review-list-response.dto';
-import { ReviewService } from 'src/place-review/review.service';
-import { ActivityListResponse } from './dto/activity-list-response.dto';
-import { CreateReviewRequest } from './dto/create-review-request.dto';
-import { CreateReviewResponse } from './dto/create-review-response.dto';
-import { PlaceDetailResponse } from './dto/place-detail-response.dto';
-import { PlaceListResponse } from './dto/place-list-response.dto';
-import { PlaceNewsResponse } from './dto/place-news-response.dto';
-import { SortConditon } from './entity/sort-conditon';
+import { LatitudeValidationPipe } from 'src/global/validation/pipe/latitude-validation.pipe';
+import { LongitudeValidationPipe } from 'src/global/validation/pipe/longitutde-validation.pipe';
+import { PlaceExistsValidationPipe } from 'src/global/validation/pipe/place-exists-validation.pipe';
+import { PlaceNewsExistsValidationPipe } from 'src/global/validation/pipe/place-news-exists-validation.pipe';
+import { PlaceReviewExistsValidationPipe } from 'src/global/validation/pipe/place-review-exists-validation.pipe';
+import { SortConditionValidationPipe } from 'src/global/validation/pipe/sort-condition-validation.pipe';
+import { PlaceReviewResponse } from 'src/place-review/dto/place-review-response.dto';
+import { PlaceReviewService } from 'src/place-review/place-review.service';
+import { CreatePlaceReviewRequest } from './dto/request/create-place-review-request.dto';
+import { SortConditon } from './dto/request/sort-conditon';
+import { ActivityListResponse } from './dto/response/activity-list-response.dto';
+import { CreatePlaceReviewResponse } from './dto/response/create-place-review-response.dto';
+import { PlaceDetailResponse } from './dto/response/place-detail-response.dto';
+import { PlaceNewsResponse } from './dto/response/place-news-response.dto';
+import { PlacePreviewResponse } from './dto/response/place-preview-response.dto';
+import { PlaceConverter } from './place.converter';
 import { PlaceService } from './place.service';
 
 @Controller('api/places')
 @UseGuards(JwtAuthGuard)
-@ApiTags('places')
+@ApiTags('독립 서점 관련 API')
 @ApiBearerAuth()
 export class PlaceController {
   constructor(
-    private readonly placesService: PlaceService,
-    private readonly reviewService: ReviewService,
+    private readonly placeService: PlaceService,
+    private readonly placeReviewService: PlaceReviewService,
     private readonly activityService: ActivityService,
   ) {}
 
   @Get()
   @ApiOperation({
-    summary: '카테고리로 장소 조회',
-    description: '해당하는 카테고리의 장소를 정렬 기준에 맞추어 10개씩 페이징하여 조회한다.',
-  })
-  @ApiQuery({
-    name: 'category',
-    description: '장소 카테고리',
-    enum: [0, 1, 2],
+    summary: '독립 서점 조회',
+    description: '해당하는 카테고리의 장소를 정렬 기준에 맞추어 10개씩 페이징하여 조회합니다.',
   })
   @ApiQuery({
     name: 'sortBy',
     description: '정렬 기준',
-    enum: ['distance', 'review', 'rating'],
+    enum: SortConditon,
     required: false,
     schema: {
       default: 'distance',
@@ -72,12 +73,12 @@ export class PlaceController {
   })
   @ApiQuery({
     name: 'lat',
-    description: '현재 위치 위도',
+    description: '현재 위치 위도 (-90 ~ 90, 소수 여섯째 자리까지만)',
     example: 37.234663,
   })
   @ApiQuery({
     name: 'lon',
-    description: '현재 위치 경도',
+    description: '현재 위치 경도 (-180 ~ 180, 소수 여섯째 자리까지만)',
     example: 127.061425,
   })
   @ApiQuery({
@@ -86,17 +87,16 @@ export class PlaceController {
     example: 4,
     required: false,
   })
-  @ApiOkResponse({ type: [PlaceListResponse], description: '장소 조회 성공' })
-  async findPlacesByCategory(
-    @Query('category') category: number,
-    @Query('sortBy') sortBy: string = 'distance',
-    @Query('lat') lat: number,
-    @Query('lon') lon: number,
-    @Query('last') last: number,
-  ): Promise<BaseResponse<PlaceListResponse[]>> {
-    return new BaseResponse<PlaceListResponse[]>(
-      await this.placesService.findPlacesByCategory(category, sortBy, lat, lon, last),
-    );
+  @ApiOkResponse({ type: [PlacePreviewResponse], description: '장소 조회 성공' })
+  async findPlaces(
+    @Query('sortBy', SortConditionValidationPipe) sortBy: string = SortConditon.DISTANCE,
+    @Query('lat', LatitudeValidationPipe) lat: number,
+    @Query('lon', LongitudeValidationPipe) lon: number,
+    @Query('last', PlaceExistsValidationPipe) last: number,
+  ): Promise<BaseResponse<PlacePreviewResponse[]>> {
+    const places = await this.placeService.findPlaces(sortBy, lat, lon, last);
+
+    return BaseResponse.of(PlaceConverter.toPlacePreviewListResponse(places));
   }
 
   @Get('search')
@@ -113,7 +113,6 @@ export class PlaceController {
     name: 'sortBy',
     description: '정렬 기준',
     enum: SortConditon,
-    example: 'review',
     required: false,
     schema: {
       default: 'distance',
@@ -121,12 +120,12 @@ export class PlaceController {
   })
   @ApiQuery({
     name: 'lat',
-    description: '현재 위치 위도',
+    description: '현재 위치 위도 ([-90, 90], 소수 여섯째 자리까지만)',
     example: 37.238293,
   })
   @ApiQuery({
     name: 'lon',
-    description: '현재 위치 경도',
+    description: '현재 위치 경도 ([-180, 180], 소수 여섯째 자리까지만)',
     example: 127.075852,
   })
   @ApiQuery({
@@ -134,17 +133,17 @@ export class PlaceController {
     description: '마지막으로 본 장소의 아이디 (페이징 용)',
     example: 5,
   })
-  @ApiOkResponse({ type: [PlaceListResponse], description: '장소 검색 성공' })
+  @ApiOkResponse({ type: [PlacePreviewResponse], description: '장소 검색 성공' })
   async findPlacesByKeyword(
     @Query('keyword') keyword: string,
-    @Query('sortBy') sortBy: string,
-    @Query('lat') lat: number,
-    @Query('lon') lon: number,
-    @Query('last') last: number,
-  ): Promise<BaseResponse<PlaceListResponse[]>> {
-    return new BaseResponse<PlaceListResponse[]>(
-      await this.placesService.findPlacesByKeyword(keyword, sortBy, lat, lon, last),
-    );
+    @Query('sortBy', SortConditionValidationPipe) sortBy: string,
+    @Query('lat', LatitudeValidationPipe) lat: number,
+    @Query('lon', LongitudeValidationPipe) lon: number,
+    @Query('last', PlaceExistsValidationPipe) last: number,
+  ): Promise<BaseResponse<PlacePreviewResponse[]>> {
+    const places = await this.placeService.findPlacesByKeyword(keyword, sortBy, lat, lon, last);
+
+    return BaseResponse.of(PlaceConverter.toPlacePreviewListResponse(places));
   }
 
   @Get('maps')
@@ -153,14 +152,24 @@ export class PlaceController {
     description: '현재 보고 있는 지도의 범위 내에서 장소를 조회합니다.',
   })
   @ApiQuery({
-    name: 'center',
-    description: '지도에서 중앙점의 좌표 ⚠️ 반드시 {위도}, {경도} 형식으로 보낼 것',
-    example: '37.547689, 126.942383',
+    name: 'centerLat',
+    description: '지도 중앙의 위도',
+    example: '37.547689',
   })
   @ApiQuery({
-    name: 'tr',
-    description: '지도에서 우상단의 좌표 ⚠️ 반드시 {위도}, {경도} 형식으로 보낼 것',
-    example: '37.572440, 126.885726',
+    name: 'centerLon',
+    description: '지도 중앙의 경도',
+    example: '126.942383',
+  })
+  @ApiQuery({
+    name: 'topRightLat',
+    description: '지도에서 우상단의 위도',
+    example: '37.572440',
+  })
+  @ApiQuery({
+    name: 'topRightLon',
+    description: '지도에서 좌상단의 경도',
+    example: '126.885726',
   })
   @ApiQuery({
     name: 'sortBy',
@@ -173,16 +182,22 @@ export class PlaceController {
   })
   @ApiOkResponse({
     description: '조회 성공',
-    type: [PlaceListResponse],
+    type: [PlacePreviewResponse],
   })
   async findPlacesByBounds(
-    @Query('center', new ParseArrayPipe({ items: Number, separator: ',' })) center: number[],
-    @Query('tr', new ParseArrayPipe({ items: Number, separator: ',' })) tr: number[],
-    @Query('sortBy') sortBy: string = SortConditon.DISTANCE,
-  ): Promise<BaseResponse<PlaceListResponse[]>> {
-    return new BaseResponse<PlaceListResponse[]>(
-      await this.placesService.findPlacesByBounds(center, tr, sortBy),
+    @Query('centerLat', LatitudeValidationPipe) centerLat: number,
+    @Query('centerLon', LongitudeValidationPipe) centerLon: number,
+    @Query('topRightLat', LatitudeValidationPipe) topRightLat: number,
+    @Query('topRightLon', LongitudeValidationPipe) topRightLon: number,
+    @Query('sortBy', SortConditionValidationPipe) sortBy: string = SortConditon.DISTANCE,
+  ): Promise<BaseResponse<PlacePreviewResponse[]>> {
+    const places = await this.placeService.findPlacesByBounds(
+      [centerLat, centerLon],
+      [topRightLat, topRightLon],
+      sortBy,
     );
+
+    return BaseResponse.of(PlaceConverter.toPlacePreviewListResponse(places));
   }
 
   @Get(':placeId')
@@ -191,11 +206,11 @@ export class PlaceController {
   @ApiOkResponse({ type: PlaceDetailResponse })
   async getPlaceDetail(
     @ExtractPayload() userId: number,
-    @Param('placeId') placeId: number,
+    @Param('placeId', PlaceExistsValidationPipe) placeId: number,
   ): Promise<BaseResponse<PlaceDetailResponse>> {
-    return new BaseResponse<PlaceDetailResponse>(
-      await this.placesService.getPlaceDetail(userId, placeId),
-    );
+    const place = await this.placeService.getPlaceDetail(placeId);
+
+    return BaseResponse.of(await PlaceConverter.toPlaceDetailResponse(place));
   }
 
   @Get(':placeId/reviews')
@@ -203,7 +218,7 @@ export class PlaceController {
     summary: '장소 리뷰 조회',
     description: '해당 장소의 리뷰를 최신순으로 10개씩 페이징하여 조회한다.',
   })
-  @ApiOkResponse({ description: '장소 리뷰 조회 성공', type: [ReviewListResponse] })
+  @ApiOkResponse({ description: '장소 리뷰 조회 성공', type: [PlaceReviewResponse] })
   @ApiParam({ name: 'placeId', description: '리뷰를 조회할 장소의 아이디' })
   @ApiQuery({
     name: 'last',
@@ -212,12 +227,12 @@ export class PlaceController {
   })
   async findPlaceReviews(
     @ExtractPayload() userId: number,
-    @Param('placeId') placeId: number,
-    @Query('last') last: number,
-  ): Promise<BaseResponse<ReviewListResponse[]>> {
-    return new BaseResponse<ReviewListResponse[]>(
-      await this.reviewService.findPlaceReviews(userId, placeId, last),
-    );
+    @Param('placeId', PlaceExistsValidationPipe) placeId: number,
+    @Query('last', PlaceReviewExistsValidationPipe) last: number,
+  ): Promise<BaseResponse<PlaceReviewResponse[]>> {
+    const reviews = await this.placeReviewService.findPlaceReviews(userId, placeId, last);
+
+    return BaseResponse.of(PlaceConverter.toPlaceReviewResponseList(reviews));
   }
 
   @Get(':placeId/news')
@@ -229,18 +244,18 @@ export class PlaceController {
   @ApiQuery({ name: 'last', description: '마지막으로 본 소식의 아이디 (페이징 용)' })
   @ApiOkResponse({ type: [PlaceNewsResponse] })
   async findPlaceNews(
-    @Param('placeId') placeId: number,
-    @Query('last') last: number,
+    @Param('placeId', PlaceExistsValidationPipe) placeId: number,
+    @Query('last', PlaceNewsExistsValidationPipe) last: number,
   ): Promise<BaseResponse<PlaceNewsResponse[]>> {
-    return new BaseResponse<PlaceNewsResponse[]>(
-      await this.placesService.getPlaceNews(placeId, last),
-    );
+    const places = await this.placeService.getPlaceNews(placeId, last);
+
+    return BaseResponse.of(PlaceConverter.toPlaceNewsListResponse(places));
   }
 
   @Post(':placeId/reviews')
-  @UseInterceptors(FilesInterceptor('images', 5))
+  @UseInterceptors(FilesInterceptor('images', 3))
   @ApiConsumes('multipart/form-data')
-  @ApiExtraModels(CreateReviewRequest)
+  @ApiExtraModels(CreatePlaceReviewRequest)
   @ApiBody({
     schema: {
       allOf: [
@@ -248,29 +263,35 @@ export class PlaceController {
           type: 'object',
           properties: {
             images: {
-              type: 'string',
-              format: 'binary',
+              type: 'array',
+              items: {
+                type: 'string',
+                format: 'binary',
+              },
+              maxItems: 3,
             },
           },
         },
-        { $ref: getSchemaPath(CreateReviewRequest) },
+        { $ref: getSchemaPath(CreatePlaceReviewRequest) },
       ],
     },
   })
   @ApiOperation({
     summary: '리뷰 등록',
     description:
-      '해당 장소에 리뷰를 등록한다. 사진은 5장까지 업로드 가능. ⚠️ multipart/form-data로 요청',
+      '해당 장소에 리뷰를 등록한다. 사진은 3장까지 업로드 가능. ⚠️ multipart/form-data로 요청',
   })
-  @ApiCreatedResponse({ description: '리뷰 등록 성공', type: CreateReviewResponse })
+  @ApiCreatedResponse({ description: '리뷰 등록 성공', type: CreatePlaceReviewResponse })
   async createReview(
     @ExtractPayload() authorId: number,
-    @Param('placeId') placeId: number,
-    @Body() reqeust: CreateReviewRequest,
+    @Param('placeId', PlaceExistsValidationPipe) placeId: number,
+    @Body() reqeust: CreatePlaceReviewRequest,
     @UploadedFiles() reviewImages: Express.Multer.File[],
-  ): Promise<BaseResponse<CreateReviewResponse>> {
-    return new BaseResponse(
-      await this.reviewService.create(authorId, placeId, reqeust, reviewImages),
+  ): Promise<BaseResponse<CreatePlaceReviewResponse>> {
+    const review = await this.placeReviewService.create(authorId, placeId, reqeust, reviewImages);
+
+    return BaseResponse.of(
+      PlaceConverter.toCreatePlaceReviewResponse(review),
       GlobalResponseCode.CREATED,
     );
   }
@@ -284,8 +305,6 @@ export class PlaceController {
     @Param('placeId') placeId: number,
     @Query('last') last: number,
   ): Promise<BaseResponse<ActivityListResponse[]>> {
-    return new BaseResponse<ActivityListResponse[]>(
-      await this.activityService.findPlaceActivities(placeId, last),
-    );
+    return BaseResponse.of(await this.activityService.findPlaceActivities(placeId, last));
   }
 }

@@ -10,10 +10,14 @@ export class BaseResponse<T> {
 
   private result: T;
 
-  constructor(result: T, code?: ResponseCode) {
+  private constructor(result: T, code?: ResponseCode) {
     this.status = code?.getStatus() ?? GlobalResponseCode.OK.getStatus();
     this.code = code?.getCode() ?? GlobalResponseCode.OK.getCode();
     this.message = code?.getMessage() ?? GlobalResponseCode.OK.getMessage();
     this.result = result;
+  }
+
+  public static of<T>(result: T, code?: ResponseCode): BaseResponse<T> {
+    return new BaseResponse(result, code);
   }
 }

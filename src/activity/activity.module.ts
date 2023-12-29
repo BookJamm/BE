@@ -6,12 +6,11 @@ import { UserModule } from 'src/user/user.module';
 import { ActivityController } from './activity.controller';
 import { ActivityService } from './activity.service';
 import { ActivityLike } from './entity/activity-like.entity';
-import { ActivityReview } from './entity/activity-review.entity';
 import { Activity } from './entity/activity.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Activity, Place, ActivityLike, ActivityReview]),
+    TypeOrmModule.forFeature([Activity, Place, ActivityLike]),
     forwardRef(() => PlaceModule),
     UserModule,
   ],

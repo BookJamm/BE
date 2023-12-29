@@ -22,4 +22,9 @@ export const PlaceResponseCode = {
     'PLACE_004',
     '해당 장소가 존재하지 않습니다.',
   ),
+  NEWS_NOT_FOUND: new ResponseCode(
+    HttpStatus.NOT_FOUND,
+    'PLACE_005',
+    '해당 소식이 존재하지 않습니다.',
+  ),
 };

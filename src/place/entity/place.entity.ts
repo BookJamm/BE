@@ -1,7 +1,6 @@
 import { Activity } from 'src/activity/entity/activity.entity';
 import { BaseEntity, Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { PlaceAddress } from './place-address.entity';
-import { PlaceBookmark } from './place-bookmark.entity';
 import { PlaceHour } from './place-hour.entity';
 import { PlaceNews } from './place-news.entity';
 
@@ -15,9 +14,6 @@ export class Place extends BaseEntity {
 
   @Column()
   reviewCount: number;
-
-  @Column()
-  category: number;
 
   @Column()
   name: string;
@@ -34,17 +30,11 @@ export class Place extends BaseEntity {
   @Column()
   lon: number;
 
-  @Column()
-  bookmarkCount: number;
-
   @OneToOne(() => PlaceAddress, address => address.place)
   address: PlaceAddress;
 
   @OneToMany(() => PlaceHour, hour => hour.place)
   hours: PlaceHour[];
-
-  @OneToMany(() => PlaceBookmark, bookmark => bookmark.place)
-  bookmarks: PlaceBookmark[];
 
   @OneToMany(() => PlaceNews, news => news.place)
   news: PlaceNews[];

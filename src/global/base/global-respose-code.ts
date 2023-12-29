@@ -14,6 +14,7 @@ export const GlobalResponseCode = {
     '지원하지 않는 URI입니다.',
   ),
   EMPTY_KEYWORD: new ResponseCode(HttpStatus.BAD_REQUEST, 'REQ_002', '검색 키워드가 없습니다.'),
+  VALIDATION_ERROR: new ResponseCode(HttpStatus.BAD_REQUEST, 'REQ_003', ''),
 
   // 5XX
   DB_ERROR: new ResponseCode(HttpStatus.INTERNAL_SERVER_ERROR, 'DB ERROR', ''),

@@ -8,6 +8,7 @@ import { EmailCheckRequest } from './dto/email-check-request.dto';
 import { EmailCheckResponse } from './dto/email-check-response.dto';
 import { JwtResponse } from './dto/jwt-response.dto';
 import { KakaoOAuthRequest } from './dto/kakao-oauth-request.dto';
+import { KakaoOAuthResponse } from './dto/kakao-oauth-response.dto';
 import { LoginRequest } from './dto/login-request.dto';
 import { JwtAuthGuard } from './guard/auth.guard';
 import { AppleOAuthRequest } from './dto/apple-oauth-request.dto';
@@ -26,9 +27,7 @@ export class AuthController {
   })
   @ApiOkResponse({ type: JwtResponse, description: '로그인 성공' })
   async login(@Body() requst: LoginRequest): Promise<BaseResponse<JwtResponse>> {
-    return new BaseResponse<JwtResponse>(
-      await this.authService.login(requst.email, requst.password),
-    );
+    return BaseResponse.of(await this.authService.login(requst.email, requst.password));
   }
 
   @Get('reissue')
@@ -44,7 +43,7 @@ export class AuthController {
     @ExtractPayload() userId: number,
     @ExtractToken() refreshToken: string,
   ): Promise<BaseResponse<JwtResponse>> {
-    return new BaseResponse<JwtResponse>(await this.authService.reissueToken(userId, refreshToken));
+    return BaseResponse.of(await this.authService.reissueToken(userId, refreshToken));
   }
 
   @Post('email-check')
@@ -54,12 +53,18 @@ export class AuthController {
   async checkEmailTaken(
     @Body() reqeust: EmailCheckRequest,
   ): Promise<BaseResponse<EmailCheckResponse>> {
-    return new BaseResponse<EmailCheckResponse>({
+    return BaseResponse.of({
       availabe: await this.authService.checkEmailTaken(reqeust.email),
     });
   }
 
   @Post('login/kakao')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: KakaoOAuthResponse, description: '로그인 성공' })
+  @ApiOperation({
+    summary: '카카오 로그인',
+    description: '카카오 로그인을 진행합니다. isLogin이 false면 회원가입입니다.',
+  })
   async kakaoOAuth(@Body() request: KakaoOAuthRequest) {
     return this.authService.kakaoOAuth(request.accessToken);
   }

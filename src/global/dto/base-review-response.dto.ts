@@ -15,16 +15,9 @@ export class AuthorResponse {
     example: 'https://bookjam-bucket.s3.ap-northeast-2.amazonaws.com/v4q0b0ff4hcpew1g6t39.jpg',
   })
   profileImage: string;
-
-  @ApiProperty({
-    description: '친구 여부, true면 친구로 등록되어 있는 상태, 자기 자신인 경우 null',
-    example: true,
-    nullable: true,
-  })
-  following: boolean;
 }
 
-export class BaseReviewListResponse {
+export class BaseReviewResponse {
   @Type(() => Number)
   @ApiProperty({ description: '리뷰 아이디', example: 1 })
   reviewId: number;
