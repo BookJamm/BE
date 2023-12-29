@@ -227,33 +227,21 @@ export class AuthService {
           .refreshToken(refreshToken)
           .build(),
       );
-
-      accessToken = await this.generateAccessToken(
-        user.userId,
-        Object.values(SocialType)[socialType],
-        user.socialId,
-      );
-
-      refreshToken = await this.generateRefreshToken(
-        user.userId,
-        Object.values(SocialType)[socialType],
-        user.socialId,
-      );
     } else {
       isLogin = true;
-
-      accessToken = await this.generateAccessToken(
-        user.userId,
-        Object.values(SocialType)[socialType],
-        user.socialId,
-      );
-
-      refreshToken = await this.generateRefreshToken(
-        user.userId,
-        Object.values(SocialType)[socialType],
-        user.socialId,
-      );
     }
+
+    accessToken = await this.generateAccessToken(
+      user.userId,
+      Object.values(SocialType)[socialType],
+      user.socialId,
+    );
+
+    refreshToken = await this.generateRefreshToken(
+      user.userId,
+      Object.values(SocialType)[socialType],
+      user.socialId,
+    );
 
     return Builder(AppleOAuthResponse)
       .isLogin(isLogin)

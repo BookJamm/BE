@@ -11,6 +11,7 @@ import { KakaoOAuthRequest } from './dto/kakao-oauth-request.dto';
 import { LoginRequest } from './dto/login-request.dto';
 import { JwtAuthGuard } from './guard/auth.guard';
 import { AppleOAuthRequest } from './dto/apple-oauth-request.dto';
+import { AppleOAuthResponse } from './dto/apple-oauth-response.dto';
 
 @Controller('api/auth')
 @ApiTags('auth')
@@ -63,8 +64,13 @@ export class AuthController {
     return this.authService.kakaoOAuth(request.accessToken);
   }
 
-  @Post('login/kakao')
-  async appleOAuth(@Body() request: AppleOAuthRequest) {
-    return this.authService.appleOAuth(request.accessToken);
+  @Post('login/apple')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: AppleOAuthResponse, description: 'Apple 로그인 성공' })
+  @ApiOperation({ summary: 'Apple login' })
+  async appleOAuth(@Body() request: AppleOAuthRequest): Promise<BaseResponse<AppleOAuthResponse>> {
+    return new BaseResponse<AppleOAuthResponse>(
+      await this.authService.appleOAuth(request.accessToken),
+    );
   }
 }
