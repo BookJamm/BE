@@ -9,7 +9,6 @@ import { UserService } from 'src/user/user.service';
 import { LessThan, Repository } from 'typeorm';
 import { ActivityDetailResponse } from './dto/activity-detail-response.dto';
 import { ActivityLike } from './entity/activity-like.entity';
-import { ActivityReview } from './entity/activity-review.entity';
 import { Activity } from './entity/activity.entity';
 import { ActivityResponseCode } from './exception/activity-response-code';
 
@@ -22,8 +21,6 @@ export class ActivityService {
     private readonly activityLikeRepository: Repository<ActivityLike>,
     @InjectRepository(Place)
     private readonly placeRepository: Repository<Place>,
-    @InjectRepository(ActivityReview)
-    private readonly activityReviewRepository: Repository<ActivityReview>,
     private readonly userService: UserService,
   ) {}
   async findPlaceActivities(placeId: number, last: number): Promise<ActivityListResponse[]> {

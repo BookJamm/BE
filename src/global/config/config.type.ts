@@ -18,6 +18,7 @@ export type S3Config = {
   accessKey: string;
   secretAccessKey: string;
   bucket: string;
+  region: string;
 };
 
 export type Config = {
