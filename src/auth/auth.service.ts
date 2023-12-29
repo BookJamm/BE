@@ -9,7 +9,7 @@ import { Password } from 'src/user/entity/password';
 import { User } from 'src/user/entity/user.entity';
 import { SocialType } from 'src/user/enum/social-type';
 import { UserResponseCode } from 'src/user/exception/user-response-code';
-import { Repository } from 'typeorm';
+import { ObjectId, Repository } from 'typeorm';
 import { JwtResponse } from './dto/jwt-response.dto';
 import { KakaoOAuthResponse } from './dto/kakao-oauth-response.dto';
 import { AuthResponseCode } from './exception/auth-respone-code';
@@ -242,6 +242,10 @@ export class AuthService {
       Object.values(SocialType)[socialType],
       user.socialId,
     );
+
+    user.refreshToken = refreshToken;
+    // refresh token 새로 발급 했으니 user table에 update
+    await this.userRepository.update(user.userId, user);
 
     return Builder(AppleOAuthResponse)
       .isLogin(isLogin)

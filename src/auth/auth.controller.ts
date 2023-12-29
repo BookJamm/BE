@@ -13,6 +13,7 @@ import { LoginRequest } from './dto/login-request.dto';
 import { JwtAuthGuard } from './guard/auth.guard';
 import { AppleOAuthRequest } from './dto/apple-oauth-request.dto';
 import { AppleOAuthResponse } from './dto/apple-oauth-response.dto';
+import { AuthRequestValidationPipe } from 'src/global/validation/pipe/auth-request-validation.pipe';
 
 @Controller('api/auth')
 @ApiTags('auth')
@@ -73,9 +74,9 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: AppleOAuthResponse, description: 'Apple 로그인 성공' })
   @ApiOperation({ summary: 'Apple login' })
-  async appleOAuth(@Body() request: AppleOAuthRequest): Promise<BaseResponse<AppleOAuthResponse>> {
-    return new BaseResponse<AppleOAuthResponse>(
-      await this.authService.appleOAuth(request.accessToken),
-    );
+  async appleOAuth(
+    @Body(AuthRequestValidationPipe) request: AppleOAuthRequest,
+  ): Promise<BaseResponse<AppleOAuthResponse>> {
+    return BaseResponse.of(await this.authService.appleOAuth(request.accessToken));
   }
 }
