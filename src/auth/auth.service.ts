@@ -115,8 +115,8 @@ export class AuthService {
     const socialType = SocialType.KAKAO;
     let isLogin = true;
 
-    const kakoUser = await this.getKakaoUserByAccessToken(kakaoAccessToken);
-    const socialId = kakoUser.id.toString();
+    const kakaoUser = await this.getKakaoUserByAccessToken(kakaoAccessToken);
+    const socialId = kakaoUser.id.toString();
 
     let user = await this.userRepository.findOneBy({ socialId, socialType });
 
@@ -141,8 +141,8 @@ export class AuthService {
         Builder(User)
           .socialId(socialId)
           .socialType(socialType)
-          .username(kakoUser.kakao_account.profile.nickname)
-          .profileImage(kakoUser.kakao_account.profile.profile_image_url)
+          .username(kakaoUser.kakao_account.profile.nickname)
+          .profileImage(kakaoUser.kakao_account.profile.profile_image_url)
           .refreshToken(refreshToken)
           .build(),
       );
