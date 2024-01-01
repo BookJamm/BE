@@ -42,15 +42,4 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Follow, follow => follow.followee)
   followers: Follow[];
-
-  constructor(email: string, password: Password, username: string) {
-    super();
-    this.email = email;
-    this.password = password;
-    this.username = username;
-  }
-
-  public static createUser(email: string, password: Password, username: string): User {
-    return new User(email, password, username);
-  }
 }

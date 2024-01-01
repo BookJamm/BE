@@ -4,11 +4,12 @@ import { S3Service } from 'src/aws/s3/s3.service';
 import { Follow } from './entity/follow.entity';
 import { User } from './entity/user.entity';
 import { UserController } from './user.controller';
+import { UserConverter } from './user.converter';
 import { UserService } from './user.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Follow])],
-  providers: [UserService, S3Service],
+  providers: [UserService, S3Service, UserConverter],
   controllers: [UserController],
   exports: [UserService],
 })

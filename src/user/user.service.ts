@@ -2,8 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { S3Service } from 'src/aws/s3/s3.service';
 import { Repository } from 'typeorm';
+import { SignUpRequest } from './dto/sign-up-request.dto';
 import { Follow } from './entity/follow.entity';
 import { User } from './entity/user.entity';
+import { UserConverter } from './user.converter';
 
 @Injectable()
 export class UserService {
@@ -17,15 +19,10 @@ export class UserService {
     private readonly s3Service: S3Service,
   ) {}
 
-  async create(user: User, profileImage: Express.Multer.File): Promise<number> {
-    if (profileImage) {
-      const url = await this.s3Service.uploadProfileImageFile(profileImage);
-      user.profileImage = url;
-    }
+  async create(request: SignUpRequest, profileImage: Express.Multer.File): Promise<User> {
+    const newUser = this.userRepository.save(await UserConverter.toUser(request, profileImage));
 
-    const newUser = await this.userRepository.save(user);
-
-    return newUser.userId;
+    return newUser;
   }
 
   async getFollowing(userId: number, targetUserId: number) {
