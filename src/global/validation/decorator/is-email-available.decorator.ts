@@ -10,22 +10,22 @@ import { AuthService } from 'src/auth/auth.service';
 
 @ValidatorConstraint({ async: true })
 @Injectable()
-export class IsEmailTakenConstraint implements ValidatorConstraintInterface {
+export class IsEmailAvailableConstraint implements ValidatorConstraintInterface {
   constructor(private readonly authService: AuthService) {}
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  validate(value: any, validationArguments?: ValidationArguments): boolean | Promise<boolean> {
-    return !this.authService.checkEmailTaken(value);
+  async validate(value: any, validationArguments?: ValidationArguments): Promise<boolean> {
+    return await this.authService.isEmailAvailable(value);
   }
 }
 
-export function IsEmailTaken(options?: ValidationOptions) {
+export function IsEmailAvailable(options?: ValidationOptions) {
   return (object: Record<string, any>, propertyName: string) => {
     registerDecorator({
       target: object.constructor,
       propertyName,
       options,
       constraints: [],
-      validator: IsEmailTakenConstraint,
+      validator: IsEmailAvailableConstraint,
     });
   };
 }

@@ -88,7 +88,7 @@ export class AuthService {
     });
   }
 
-  async checkEmailTaken(email: string) {
+  async isEmailAvailable(email: string) {
     return !(await this.userRepository.exist({ where: { email } }));
   }
 

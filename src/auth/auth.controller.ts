@@ -52,7 +52,7 @@ export class AuthController {
     @Body() reqeust: EmailCheckRequest,
   ): Promise<BaseResponse<EmailCheckResponse>> {
     return BaseResponse.of({
-      availabe: await this.authService.checkEmailTaken(reqeust.email),
+      availabe: await this.authService.isEmailAvailable(reqeust.email),
     });
   }
 
