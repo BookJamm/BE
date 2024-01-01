@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
+import { IsEmailTaken } from 'src/global/validation/decorator/is-email-taken.decorator';
 import { Password } from '../entity/password';
 import { User } from '../entity/user.entity';
 
@@ -10,6 +11,7 @@ export class SignUpRequest {
   })
   @IsNotEmpty({ message: '이메일은 필수입니다.' })
   @IsEmail({}, { message: '이메일 형식이 아닙니다.' })
+  @IsEmailTaken({ message: '이미 사용된 이메일입니다.' })
   readonly email: string;
 
   @ApiProperty({

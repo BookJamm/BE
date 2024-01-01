@@ -10,6 +10,7 @@ import jwtConfig from './global/config/jwt.config';
 import s3Config from './global/config/s3.config';
 import { TypeOrmConfigService } from './global/config/typeorm-config.service';
 import { LoggerMiddleware } from './global/log.middleware';
+import { ValidationModule } from './global/validation/validation.module';
 import { PlaceReviewModule } from './place-review/place-review.module';
 import { PlaceModule } from './place/place.module';
 import { UserModule } from './user/user.module';
@@ -30,6 +31,7 @@ import { UserModule } from './user/user.module';
     PlaceModule,
     PlaceReviewModule,
     ActivityModule,
+    ValidationModule,
   ],
   controllers: [AppController],
   providers: [],

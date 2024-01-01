@@ -1,5 +1,6 @@
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { useContainer } from 'class-validator';
 import { WinstonModule, utilities } from 'nest-winston';
 import { format, transports } from 'winston';
 import 'winston-daily-rotate-file';
@@ -67,6 +68,8 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
+
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   // Exception Handler
   // 아래에서 위로 순위가 낮아짐
