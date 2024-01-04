@@ -13,6 +13,7 @@ import { BaseResponse } from 'src/global/base/base-response';
 import { GlobalResponseCode } from 'src/global/base/global-respose-code';
 import { SignUpRequest } from './dto/sign-up-request.dto';
 import { SignUpResponse } from './dto/sign-up-response.dto';
+import { UserConverter } from './user.converter';
 import { UserService } from './user.service';
 
 @Controller('api/users')
@@ -52,7 +53,7 @@ export class UserController {
     @Body() reqeust: SignUpRequest,
     @UploadedFile() profileImage: Express.Multer.File,
   ): Promise<BaseResponse<SignUpResponse>> {
-    const newUserId: number = await this.userService.create(await reqeust.toUser(), profileImage);
-    return BaseResponse.of({ userId: newUserId }, GlobalResponseCode.CREATED);
+    const newUser = await this.userService.create(reqeust, profileImage);
+    return BaseResponse.of(UserConverter.toSignUpResponse(newUser), GlobalResponseCode.CREATED);
   }
 }

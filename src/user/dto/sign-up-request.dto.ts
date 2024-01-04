@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
+import { IsEmailAvailable } from 'src/global/validation/decorator/is-email-available.decorator';
 import { Password } from '../entity/password';
-import { User } from '../entity/user.entity';
 
 export class SignUpRequest {
   @ApiProperty({
@@ -10,6 +10,7 @@ export class SignUpRequest {
   })
   @IsNotEmpty({ message: '이메일은 필수입니다.' })
   @IsEmail({}, { message: '이메일 형식이 아닙니다.' })
+  @IsEmailAvailable({ message: '이미 사용된 이메일입니다.' })
   readonly email: string;
 
   @ApiProperty({
@@ -28,14 +29,4 @@ export class SignUpRequest {
   @IsNotEmpty({ message: '닉네임은 필수입니다.' })
   @IsString({ message: '올바른 닉네임 형식이 아닙니다.' })
   readonly username: string;
-
-  constructor(email: string, password: string, username: string) {
-    this.email = email;
-    this.password = password;
-    this.username = username;
-  }
-
-  public async toUser(): Promise<User> {
-    return User.createUser(this.email, await Password.encrpyt(this.password), this.username);
-  }
 }
