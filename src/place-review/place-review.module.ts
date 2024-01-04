@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Activity } from 'src/activity/entity/activity.entity';
 import { S3Service } from 'src/aws/s3/s3.service';
 import { Place } from 'src/place/entity/place.entity';
+import { UserReport } from 'src/user/entity/user-report.entity';
 import { User } from 'src/user/entity/user.entity';
 import { UserModule } from 'src/user/user.module';
 import { PlaceReviewImage } from './entity/place-review-image.entity';
@@ -13,7 +14,7 @@ import { PlaceReviewService } from './place-review.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PlaceReview, PlaceReviewImage, User, Place, Activity]),
+    TypeOrmModule.forFeature([PlaceReview, PlaceReviewImage, User, Place, Activity, UserReport]),
     UserModule,
   ],
   controllers: [PlaceReviewController],

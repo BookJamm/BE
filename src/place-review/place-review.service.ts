@@ -6,8 +6,9 @@ import { S3Service } from 'src/aws/s3/s3.service';
 import { BaseException } from 'src/global/base/base-exception';
 import { CreatePlaceReviewRequest } from 'src/place/dto/request/create-place-review-request.dto';
 import { Place } from 'src/place/entity/place.entity';
+import { UserReport } from 'src/user/entity/user-report.entity';
 import { User } from 'src/user/entity/user.entity';
-import { LessThan, Repository } from 'typeorm';
+import { In, LessThan, Not, Repository } from 'typeorm';
 import { PlaceReview } from './entity/place-review.entity';
 import { PlaceReviewResponseCode } from './exception/place-review-response-code';
 import { PlaceReviewConverter } from './place-review.converter';
@@ -25,6 +26,8 @@ export class PlaceReviewService {
     private readonly placeReviewRepository: Repository<PlaceReview>,
     @InjectRepository(Activity)
     private readonly activityRepository: Repository<Activity>,
+    @InjectRepository(UserReport)
+    private readonly userReportRepository: Repository<UserReport>,
     private readonly s3Service: S3Service,
   ) {}
   async create(
@@ -79,8 +82,19 @@ export class PlaceReviewService {
   }
 
   async findPlaceReviews(userId: number, placeId: number, last: number): Promise<PlaceReview[]> {
+    const userReports = await this.userReportRepository.find({
+      where: { reporter: { userId } },
+      relations: { targetUser: true },
+    });
+
+    // TODO: 신고한 리뷰도 안 보이게 해야함
+
     const reviews = await this.placeReviewRepository.find({
-      where: { place: { placeId }, reviewId: last ? LessThan(last) : null },
+      where: {
+        place: { placeId },
+        reviewId: last ? LessThan(last) : null,
+        author: { userId: Not(In(userReports.map(report => report.targetUser.userId))) },
+      },
       relations: ['author', 'images'],
     });
 
