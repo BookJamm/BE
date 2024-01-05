@@ -1,5 +1,6 @@
 import { Activity } from 'src/activity/entity/activity.entity';
 import { BaseEntity } from 'src/global/base/base.entity';
+import { ContentsReport } from 'src/global/entity/contents-report.entity';
 import { Place } from 'src/place/entity/place.entity';
 import { User } from 'src/user/entity/user.entity';
 import {
@@ -53,4 +54,7 @@ export class PlaceReview extends BaseEntity {
     onDelete: 'CASCADE',
   })
   images: PlaceReviewImage[];
+
+  @OneToMany(() => ContentsReport, report => report.placeReivew)
+  reports: ContentsReport[];
 }

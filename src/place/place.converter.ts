@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Builder } from 'builder-pattern';
 import { AuthorResponse } from 'src/global/dto/base-review-response.dto';
-import { PlaceReviewResponse } from 'src/place-review/dto/place-review-response.dto';
+import { PlaceReviewResponse } from 'src/place-review/dto/response/place-review-response.dto';
 import { PlaceReview } from 'src/place-review/entity/place-review.entity';
 import { User } from 'src/user/entity/user.entity';
 import { CreatePlaceReviewResponse } from './dto/response/create-place-review-response.dto';

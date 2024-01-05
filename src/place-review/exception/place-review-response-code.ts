@@ -4,12 +4,22 @@ import { ResponseCode } from 'src/global/base/response-code';
 export const PlaceReviewResponseCode = {
   NOT_OWNER: new ResponseCode(
     HttpStatus.FORBIDDEN,
-    'REVIEW_002',
+    'REVIEW_001',
     '해당 게시물의 작성자가 아닙니다.',
   ),
   REVIEW_NOT_FOUND: new ResponseCode(
     HttpStatus.NOT_FOUND,
-    'REVIEW_003',
+    'REVIEW_002',
     '해당 게시물을 찾을 수 없습니다.',
+  ),
+  REVIEW_ALREADY_REPORTED: new ResponseCode(
+    HttpStatus.BAD_REQUEST,
+    'REVIEW_003',
+    '이미 신고된 리뷰입니다.',
+  ),
+  OWNER_REPORT: new ResponseCode(
+    HttpStatus.BAD_REQUEST,
+    'REVIEW_004',
+    '자신의 글을 신고할 수 없습니다.',
   ),
 };
