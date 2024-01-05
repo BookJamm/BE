@@ -8,7 +8,7 @@ import { UserConverter } from './user.converter';
 import { FindingPasswordRequest } from './dto/finding-password-request.dto';
 import { Password } from './entity/password';
 import { Builder } from 'builder-pattern';
-import { MailSender } from 'src/global/mail-sender';
+import { MailService } from 'src/global/mail.service';
 
 @Injectable()
 export class UserService {
@@ -18,7 +18,7 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly s3Service: S3Service,
-    private readonly mailSender: MailSender,
+    private readonly mailService: MailService,
   ) {}
 
   async create(request: SignUpRequest, profileImage: Express.Multer.File): Promise<User> {
@@ -42,7 +42,8 @@ export class UserService {
 
   async makeRandomPassword(): Promise<string> {
     const length = Math.floor(10 + Math.random() * 3);
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#%^&*()_+-=[]{}|;\':",./<>?~`\\';
     let password = '';
 
     for (let i = 0; i < length; i++) {
@@ -53,6 +54,6 @@ export class UserService {
   }
 
   async sendEmail(request: FindingPasswordRequest, password: string): Promise<void> {
-    await this.mailSender.sendMail(request.email, '[BookJam] 임시 비밀번호 안내', password);
+    await this.mailService.sendMail(request.email, '[BookJam] 임시 비밀번호 안내', password);
   }
 }
