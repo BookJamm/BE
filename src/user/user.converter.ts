@@ -5,6 +5,7 @@ import { SignUpRequest } from './dto/sign-up-request.dto';
 import { SignUpResponse } from './dto/sign-up-response.dto';
 import { Password } from './entity/password';
 import { User } from './entity/user.entity';
+import { FindingPasswordResponse } from './dto/finding-password-response.dto';
 
 @Injectable()
 export class UserConverter implements OnModuleInit {
@@ -32,5 +33,9 @@ export class UserConverter implements OnModuleInit {
 
   public static toSignUpResponse(user: User): SignUpResponse {
     return Builder(SignUpResponse).userId(user.userId).build();
+  }
+
+  public static toFindingPasswordResponse(isPasswordSended: boolean): FindingPasswordResponse {
+    return Builder(FindingPasswordResponse).isPasswordSended(isPasswordSended).build();
   }
 }

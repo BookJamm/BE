@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Global, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBody,
@@ -15,6 +15,8 @@ import { SignUpRequest } from './dto/sign-up-request.dto';
 import { SignUpResponse } from './dto/sign-up-response.dto';
 import { UserConverter } from './user.converter';
 import { UserService } from './user.service';
+import { FindingPasswordRequest } from './dto/finding-password-request.dto';
+import { FindingPasswordResponse } from './dto/finding-password-response.dto';
 
 @Controller('api/users')
 @ApiTags('users')
@@ -55,5 +57,16 @@ export class UserController {
   ): Promise<BaseResponse<SignUpResponse>> {
     const newUser = await this.userService.create(reqeust, profileImage);
     return BaseResponse.of(UserConverter.toSignUpResponse(newUser), GlobalResponseCode.CREATED);
+  }
+
+  @Post('finding-password')
+  async findPassword(
+    @Body() request: FindingPasswordRequest,
+  ): Promise<BaseResponse<FindingPasswordResponse>> {
+    const isPasswordSended = await this.userService.findPassword(request);
+    return BaseResponse.of(
+      UserConverter.toFindingPasswordResponse(isPasswordSended),
+      GlobalResponseCode.OK,
+    );
   }
 }
