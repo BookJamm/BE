@@ -74,9 +74,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: AppleOAuthResponse, description: 'Apple 로그인 성공' })
   @ApiOperation({ summary: 'Apple login' })
-  async appleOAuth(
-    @Body(AuthRequestValidationPipe) request: AppleOAuthRequest,
-  ): Promise<BaseResponse<AppleOAuthResponse>> {
+  async appleOAuth(@Body() request: AppleOAuthRequest): Promise<BaseResponse<AppleOAuthResponse>> {
     return BaseResponse.of(await this.authService.appleOAuth(request.accessToken));
   }
 }
