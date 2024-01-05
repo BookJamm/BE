@@ -92,6 +92,10 @@ export class AuthService {
     return !(await this.userRepository.exist({ where: { email } }));
   }
 
+  async isEmailExist(email: string) {
+    return await this.userRepository.exist({ where: { email } });
+  }
+
   async reissueToken(userId: number, refreshToken: string) {
     const user = await this.userRepository.findOneBy({ userId });
     if (!user) {
