@@ -3,6 +3,7 @@ import { PlaceReview } from 'src/place-review/entity/place-review.entity';
 import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { SocialType } from '../enum/social-type';
 import { Password } from './password';
+import { UserReport } from './user-report.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -35,4 +36,10 @@ export class User extends BaseEntity {
 
   @OneToMany(() => PlaceReview, review => review.author)
   reviews: PlaceReview[];
+
+  @OneToMany(() => UserReport, report => report.reporter)
+  reports: UserReport[];
+
+  @OneToMany(() => UserReport, report => report.targetUser)
+  targetedReports: UserReport[];
 }

@@ -4,6 +4,8 @@ import { BaseResponse } from 'src/global/base/base-response';
 import { ExtractPayload } from 'src/global/decorator/extract-payload.decorator';
 import { ExtractToken } from 'src/global/decorator/extract-token.decorator';
 import { AuthService } from './auth.service';
+import { AppleOAuthRequest } from './dto/apple-oauth-request.dto';
+import { AppleOAuthResponse } from './dto/apple-oauth-response.dto';
 import { EmailCheckRequest } from './dto/email-check-request.dto';
 import { EmailCheckResponse } from './dto/email-check-response.dto';
 import { JwtResponse } from './dto/jwt-response.dto';
@@ -11,9 +13,6 @@ import { KakaoOAuthRequest } from './dto/kakao-oauth-request.dto';
 import { KakaoOAuthResponse } from './dto/kakao-oauth-response.dto';
 import { LoginRequest } from './dto/login-request.dto';
 import { JwtAuthGuard } from './guard/auth.guard';
-import { AppleOAuthRequest } from './dto/apple-oauth-request.dto';
-import { AppleOAuthResponse } from './dto/apple-oauth-response.dto';
-import { AuthRequestValidationPipe } from 'src/global/validation/pipe/auth-request-validation.pipe';
 
 @Controller('api/auth')
 @ApiTags('auth')

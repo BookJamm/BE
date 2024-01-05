@@ -4,28 +4,28 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { Builder } from 'builder-pattern';
+import * as jwt from 'jsonwebtoken';
+import * as jwksClient from 'jwks-rsa';
+import { JwtHeader, jwtDecode } from 'jwt-decode';
 import { BaseException } from 'src/global/base/base-exception';
 import { Password } from 'src/user/entity/password';
 import { User } from 'src/user/entity/user.entity';
 import { SocialType } from 'src/user/enum/social-type';
 import { UserResponseCode } from 'src/user/exception/user-response-code';
-import { ObjectId, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { AppleOAuthResponse } from './dto/apple-oauth-response.dto';
 import { JwtResponse } from './dto/jwt-response.dto';
 import { KakaoOAuthResponse } from './dto/kakao-oauth-response.dto';
 import { AuthResponseCode } from './exception/auth-respone-code';
-import { JwtClaim } from './types/jwt-claim';
-import { KakaoUser } from './types/kakao-user';
-import { AppleOAuthResponse } from './dto/apple-oauth-response.dto';
-import * as jwt from 'jsonwebtoken';
-import * as jwksClient from 'jwks-rsa';
-import { JwtHeader, jwtDecode } from 'jwt-decode';
 import {
   APPLE_AUTH_TOKEN_URL,
   APPLE_ISSUER,
+  APP_BUNDLE_ID,
   AppleAuthKeys,
   AppleJWTPayload,
-  APP_BUNDLE_ID,
 } from './types/apple-user';
+import { JwtClaim } from './types/jwt-claim';
+import { KakaoUser } from './types/kakao-user';
 
 @Injectable()
 export class AuthService {
