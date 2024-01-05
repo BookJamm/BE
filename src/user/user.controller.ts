@@ -14,6 +14,7 @@ import {
   ApiConsumes,
   ApiCreatedResponse,
   ApiExtraModels,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
   getSchemaPath,
@@ -23,6 +24,8 @@ import { BaseResponse } from 'src/global/base/base-response';
 import { GlobalResponseCode } from 'src/global/base/global-respose-code';
 import { ExtractPayload } from 'src/global/decorator/extract-payload.decorator';
 import { UserExistsValidationPipe } from 'src/global/validation/pipe/user-exists-validation.pipe';
+import { FindingPasswordRequest } from './dto/finding-password-request.dto';
+import { FindingPasswordResponse } from './dto/finding-password-response.dto';
 import { ReportUserReqeust } from './dto/reqeust/report-user-request.dto';
 import { SignUpRequest } from './dto/reqeust/sign-up-request.dto';
 import { ReportUserResponse } from './dto/response/report-user-response.dto';
@@ -85,5 +88,21 @@ export class UserController {
   ): Promise<BaseResponse<ReportUserResponse>> {
     const userReport = await this.userService.reportUser(request, reporterId, userId);
     return BaseResponse.of(UserConverter.toReportUserResponse(userReport));
+  }
+
+  @Post('finding-password')
+  @ApiOperation({
+    summary: '이메일로 비밀번호 찾기',
+    description: '이메일로 비밀번호 임시 비밀번호를 보냅니다.',
+  })
+  @ApiOkResponse({ type: FindingPasswordResponse, description: '임시 비밀번호 전송 완료' })
+  async findPassword(
+    @Body() request: FindingPasswordRequest,
+  ): Promise<BaseResponse<FindingPasswordResponse>> {
+    const isPasswordSended = await this.userService.findPassword(request);
+    return BaseResponse.of(
+      UserConverter.toFindingPasswordResponse(isPasswordSended),
+      GlobalResponseCode.OK,
+    );
   }
 }

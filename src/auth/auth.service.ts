@@ -4,15 +4,26 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { Builder } from 'builder-pattern';
+import * as jwt from 'jsonwebtoken';
+import * as jwksClient from 'jwks-rsa';
+import { JwtHeader, jwtDecode } from 'jwt-decode';
 import { BaseException } from 'src/global/base/base-exception';
 import { Password } from 'src/user/entity/password';
 import { User } from 'src/user/entity/user.entity';
 import { SocialType } from 'src/user/enum/social-type';
 import { UserResponseCode } from 'src/user/exception/user-response-code';
 import { Repository } from 'typeorm';
+import { AppleOAuthResponse } from './dto/apple-oauth-response.dto';
 import { JwtResponse } from './dto/jwt-response.dto';
 import { KakaoOAuthResponse } from './dto/kakao-oauth-response.dto';
 import { AuthResponseCode } from './exception/auth-respone-code';
+import {
+  APPLE_AUTH_TOKEN_URL,
+  APPLE_ISSUER,
+  APP_BUNDLE_ID,
+  AppleAuthKeys,
+  AppleJWTPayload,
+} from './types/apple-user';
 import { JwtClaim } from './types/jwt-claim';
 import { KakaoUser } from './types/kakao-user';
 
@@ -90,6 +101,10 @@ export class AuthService {
 
   async isEmailAvailable(email: string) {
     return !(await this.userRepository.exist({ where: { email } }));
+  }
+
+  async isEmailExist(email: string) {
+    return await this.userRepository.exist({ where: { email } });
   }
 
   async reissueToken(userId: number, refreshToken: string) {
@@ -189,5 +204,91 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async appleOAuth(appleAccessToken: string): Promise<AppleOAuthResponse> {
+    const socialType = SocialType.APPLE;
+    let isLogin = true;
+
+    const appleUser = await this.getAppleUserByAccessToken(appleAccessToken);
+    const socialId = appleUser.sub;
+    const socialEmail = appleUser.email;
+
+    let user = await this.userRepository.findOneBy({ socialId, socialType });
+
+    let accessToken = '';
+    let refreshToken = '';
+
+    if (!user) {
+      isLogin = false;
+
+      user = await this.userRepository.save(
+        Builder(User)
+          .email(socialEmail)
+          .socialId(socialId)
+          .socialType(socialType)
+          .username(socialEmail.split('@')[0])
+          .refreshToken(refreshToken)
+          .build(),
+      );
+    } else {
+      isLogin = true;
+    }
+
+    accessToken = await this.generateAccessToken(
+      user.userId,
+      Object.values(SocialType)[socialType],
+      user.socialId,
+    );
+
+    refreshToken = await this.generateRefreshToken(
+      user.userId,
+      Object.values(SocialType)[socialType],
+      user.socialId,
+    );
+
+    user.refreshToken = refreshToken;
+    // refresh token 새로 발급 했으니 user table에 update
+    await this.userRepository.update(user.userId, user);
+
+    return Builder(AppleOAuthResponse)
+      .isLogin(isLogin)
+      .accessToken(accessToken)
+      .refreshToken(refreshToken)
+      .build();
+  }
+
+  private async getAppleUserByAccessToken(accessToken: string): Promise<AppleJWTPayload> {
+    try {
+      const tokenDecodedHeader = jwtDecode<JwtHeader>(accessToken, {
+        header: true,
+      });
+
+      const { data: applePublicKey } = await axios.get<AppleAuthKeys>(APPLE_AUTH_TOKEN_URL);
+
+      const client = jwksClient({
+        jwksUri: APPLE_AUTH_TOKEN_URL,
+      });
+
+      const sharedKid = applePublicKey.keys.find(
+        key => key.kid === tokenDecodedHeader.kid && key.alg === tokenDecodedHeader.alg,
+      )?.kid;
+      const key = await client.getSigningKey(sharedKid);
+      const signingKey = key.getPublicKey(); // rsa public key
+      const payload = <AppleJWTPayload>jwt.verify(accessToken, signingKey);
+      this.validateAppleToken(payload);
+      return payload;
+    } catch (error) {
+      throw BaseException.of(AuthResponseCode.APPLE_REQUEST_FAILED);
+    }
+  }
+
+  async validateAppleToken(payload: AppleJWTPayload) {
+    if (payload.iss !== APPLE_ISSUER) {
+      throw BaseException.of(AuthResponseCode.INVALID_APPLE_ISSUER);
+    }
+    if (payload.aud !== APP_BUNDLE_ID) {
+      throw BaseException.of(AuthResponseCode.INVALID_APPLE_AUDIENCE);
+    }
   }
 }

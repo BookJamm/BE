@@ -4,6 +4,8 @@ import { BaseResponse } from 'src/global/base/base-response';
 import { ExtractPayload } from 'src/global/decorator/extract-payload.decorator';
 import { ExtractToken } from 'src/global/decorator/extract-token.decorator';
 import { AuthService } from './auth.service';
+import { AppleOAuthRequest } from './dto/apple-oauth-request.dto';
+import { AppleOAuthResponse } from './dto/apple-oauth-response.dto';
 import { EmailCheckRequest } from './dto/email-check-request.dto';
 import { EmailCheckResponse } from './dto/email-check-response.dto';
 import { JwtResponse } from './dto/jwt-response.dto';
@@ -65,5 +67,13 @@ export class AuthController {
   })
   async kakaoOAuth(@Body() request: KakaoOAuthRequest) {
     return this.authService.kakaoOAuth(request.accessToken);
+  }
+
+  @Post('login/apple')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: AppleOAuthResponse, description: 'Apple 로그인 성공' })
+  @ApiOperation({ summary: 'Apple login' })
+  async appleOAuth(@Body() request: AppleOAuthRequest): Promise<BaseResponse<AppleOAuthResponse>> {
+    return BaseResponse.of(await this.authService.appleOAuth(request.accessToken));
   }
 }

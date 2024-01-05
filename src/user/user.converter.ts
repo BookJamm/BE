@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Builder } from 'builder-pattern';
 import { S3Service } from 'src/aws/s3/s3.service';
+import { FindingPasswordResponse } from './dto/finding-password-response.dto';
 import { ReportUserReqeust } from './dto/reqeust/report-user-request.dto';
 import { SignUpRequest } from './dto/reqeust/sign-up-request.dto';
 import { ReportUserResponse } from './dto/response/report-user-response.dto';
@@ -51,5 +52,9 @@ export class UserConverter implements OnModuleInit {
       .reportedAt(userReport.createdAt)
       .reportedUserId(userReport.reporter.userId)
       .build();
+  }
+
+  public static toFindingPasswordResponse(isPasswordSended: boolean): FindingPasswordResponse {
+    return Builder(FindingPasswordResponse).isPasswordSended(isPasswordSended).build();
   }
 }
