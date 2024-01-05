@@ -6,5 +6,6 @@ export class FindingPasswordRequest {
   @IsEmail({}, { message: '이메일 형식이 아닙니다' })
   @IsNotEmpty({ message: '이메일은 필수입니다.' })
   @IsEmailExist({ message: '존재하지 않는 유저입니다.' })
+  @ApiProperty({ description: '이메일', example: 'example@example.com' })
   readonly email: string;
 }

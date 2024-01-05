@@ -5,6 +5,7 @@ import {
   ApiConsumes,
   ApiCreatedResponse,
   ApiExtraModels,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
   getSchemaPath,
@@ -60,6 +61,11 @@ export class UserController {
   }
 
   @Post('finding-password')
+  @ApiOperation({
+    summary: '이메일로 비밀번호 찾기',
+    description: '이메일로 비밀번호 임시 비밀번호를 보냅니다.',
+  })
+  @ApiOkResponse({ type: FindingPasswordResponse, description: '임시 비밀번호 전송 완료' })
   async findPassword(
     @Body() request: FindingPasswordRequest,
   ): Promise<BaseResponse<FindingPasswordResponse>> {
