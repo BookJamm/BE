@@ -30,8 +30,9 @@ export class UserService {
   async findPassword(request: FindingPasswordRequest): Promise<boolean> {
     try {
       const user: User = await this.userRepository.findOneBy({ email: request.email });
-      const password: Password = await this.makeRandomPassword();
-      user.password = await Password.encrpyt(password.value);
+      const password = await this.makeRandomPassword();
+      user.password = await Password.encrpyt(password);
+      await this.userRepository.save(user);
       await this.sendEmail(request, password);
       return true;
     } catch (error) {
@@ -39,19 +40,19 @@ export class UserService {
     }
   }
 
-  async makeRandomPassword(): Promise<Password> {
+  async makeRandomPassword(): Promise<string> {
     const length = Math.floor(10 + Math.random() * 3);
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let str = '';
+    let password = '';
 
     for (let i = 0; i < length; i++) {
-      str += chars.charAt(Math.floor(Math.random() * chars.length));
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
-    return Builder(Password).value(str).build();
+    return password;
   }
 
-  async sendEmail(request: FindingPasswordRequest, password: Password): Promise<void> {
-    await this.mailSender.sendMail(request.email, '[BookJam] 임시 비밀번호 안내', password.value);
+  async sendEmail(request: FindingPasswordRequest, password: string): Promise<void> {
+    await this.mailSender.sendMail(request.email, '[BookJam] 임시 비밀번호 안내', password);
   }
 }
