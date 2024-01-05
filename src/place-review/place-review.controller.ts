@@ -4,7 +4,7 @@ import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { BaseResponse } from 'src/global/base/base-response';
 import { ExtractPayload } from 'src/global/decorator/extract-payload.decorator';
 import { PlaceReviewExistsValidationPipe } from 'src/global/validation/pipe/place-review-exists-validation.pipe';
-import { DeleteReviewResponse } from './dto/delete-review-response.dto';
+import { DeleteReviewResponse } from './dto/response/delete-review-response.dto';
 import { PlaceReviewService } from './place-review.service';
 
 @Controller('api/place-reviews')
