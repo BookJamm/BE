@@ -20,7 +20,7 @@ import { PlaceReviewService } from './place-review.service';
 
 @Controller('api/place-reviews')
 @UseGuards(JwtAuthGuard)
-@ApiTags('place reviews')
+@ApiTags('독립 서점 리뷰 관련 API')
 @ApiBearerAuth()
 export class PlaceReviewController {
   constructor(private readonly placeReviewService: PlaceReviewService) {}
