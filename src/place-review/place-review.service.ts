@@ -11,7 +11,9 @@ import { Place } from 'src/place/entity/place.entity';
 import { UserReport } from 'src/user/entity/user-report.entity';
 import { User } from 'src/user/entity/user.entity';
 import { And, In, LessThan, Not, Repository } from 'typeorm';
+import { PatchPlaceReviewRequest } from './dto/request/patch-place-review-request.dto';
 import { ReportPlaceReviewRequest } from './dto/request/report-place-review-request.dto';
+import { PlaceReviewImage } from './entity/place-review-image.entity';
 import { PlaceReview } from './entity/place-review.entity';
 import { PlaceReviewResponseCode } from './exception/place-review-response-code';
 import { PlaceReviewConverter } from './place-review.converter';
@@ -27,6 +29,8 @@ export class PlaceReviewService {
     private readonly placeRepository: Repository<Place>,
     @InjectRepository(PlaceReview)
     private readonly placeReviewRepository: Repository<PlaceReview>,
+    @InjectRepository(PlaceReviewImage)
+    private readonly placeReviewImageRepository: Repository<PlaceReviewImage>,
     @InjectRepository(Activity)
     private readonly activityRepository: Repository<Activity>,
     @InjectRepository(UserReport)
@@ -142,5 +146,75 @@ export class PlaceReviewService {
     const contentsReport = PlaceReviewConverter.toContentsReport(request, reporter, targetReview);
 
     return this.contentsReportRepository.save(contentsReport);
+  }
+
+  async updatePlaceReview(
+    request: PatchPlaceReviewRequest,
+    userId: number,
+    reviewId: number,
+    newImages: Express.Multer.File[],
+  ): Promise<PlaceReview> {
+    const review = await this.placeReviewRepository.findOne({
+      where: { reviewId },
+      relations: { author: true, place: true, images: true },
+    });
+
+    // 작성자 본인 확인
+    if (review.author.userId !== userId) {
+      throw BaseException.of(PlaceReviewResponseCode.NOT_OWNER);
+    }
+
+    // 남긴 이미지 + 새 이미지 개수 확인
+    if (request.remainImages.length + newImages.length > 3) {
+      throw BaseException.of(PlaceReviewResponseCode.IMAGES_NUM_EXCEEDED);
+    }
+
+    // 남긴 이미지 존재 확인
+    await Promise.all(
+      request.remainImages.map(async imageId => {
+        if (!(await this.placeReviewImageRepository.exist({ where: { id: imageId } }))) {
+          throw BaseException.of(PlaceReviewResponseCode.IMAGE_NOT_FOUND);
+        }
+      }),
+    );
+
+    let activity: Activity;
+    if (request.activityId) {
+      activity = await this.activityRepository.findOneBy({
+        activityId: request.activityId,
+        place: { placeId: review.place.placeId },
+      });
+
+      if (activity === null) {
+        throw BaseException.of(ActivityResponseCode.ACTIVITY_NOT_FOUND);
+      }
+    }
+
+    // 기존 이미지 삭제
+    await Promise.all(
+      review.images.map(async image => {
+        if (!request.remainImages.includes(image.id)) {
+          await this.s3Service.deleteFileByUrl(image.imageUrl);
+          await this.placeReviewImageRepository.remove(image);
+        }
+      }),
+    );
+
+    // 새 이미지 추가
+    await Promise.all(
+      newImages.map(async image => {
+        const imageUrl = await this.s3Service.uploadPlaceReviewImageFile(image);
+        const newPlaceImage = PlaceReviewConverter.toPlaceReviewImage(imageUrl);
+        newPlaceImage.review = review;
+
+        await this.placeReviewImageRepository.save(newPlaceImage);
+      }),
+    );
+
+    const updatedReview = await this.placeReviewRepository.save(
+      await PlaceReviewConverter.toUpdatePlaceReview(review, request, activity),
+    );
+
+    return updatedReview;
   }
 }

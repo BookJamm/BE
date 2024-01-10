@@ -8,7 +8,9 @@ import { PlaceReviewReportReason } from 'src/place-review/enum/place-review-repo
 import { CreatePlaceReviewRequest } from 'src/place/dto/request/create-place-review-request.dto';
 import { Place } from 'src/place/entity/place.entity';
 import { User } from 'src/user/entity/user.entity';
+import { PatchPlaceReviewRequest } from './dto/request/patch-place-review-request.dto';
 import { ReportPlaceReviewRequest } from './dto/request/report-place-review-request.dto';
+import { PatchPlaceReviewResponse } from './dto/response/patch-place-review-response.dto';
 import { ReportPlaceReviewResponse } from './dto/response/report-place-review-response.dto';
 import { PlaceReviewImage } from './entity/place-review-image.entity';
 import { PlaceReview } from './entity/place-review.entity';
@@ -48,7 +50,24 @@ export class PlaceReviewConverter implements OnModuleInit {
       .build();
   }
 
-  private static toPlaceReviewImage(imageUrl: string): PlaceReviewImage {
+  public static async toUpdatePlaceReview(
+    review: PlaceReview,
+    request: PatchPlaceReviewRequest,
+    activity: Activity,
+  ) {
+    review.visitedAt = request.visitedAt;
+    review.contents = request.contents;
+    review.rating = request.rating;
+    review.commentAllowed = request.commentAllowed;
+    if (activity) {
+      review.activity = activity;
+    }
+    review.images = undefined;
+
+    return review;
+  }
+
+  public static toPlaceReviewImage(imageUrl: string): PlaceReviewImage {
     return Builder<PlaceReviewImage>().imageUrl(imageUrl).build();
   }
 
@@ -69,6 +88,13 @@ export class PlaceReviewConverter implements OnModuleInit {
     return Builder(ReportPlaceReviewResponse)
       .reportedAt(contentsReport.createdAt)
       .reportedPlaceReviewId(contentsReport.placeReivew.reviewId)
+      .build();
+  }
+
+  public static toPatchPlaceReviewResponse(review: PlaceReview) {
+    return Builder(PatchPlaceReviewResponse)
+      .updatedReviewId(review.reviewId)
+      .updatedAt(review.updatedAt)
       .build();
   }
 }
