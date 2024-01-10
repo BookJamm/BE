@@ -32,6 +32,8 @@ import { ReportUserResponse } from './dto/response/report-user-response.dto';
 import { SignUpResponse } from './dto/response/sign-up-response.dto';
 import { UserConverter } from './user.converter';
 import { UserService } from './user.service';
+import { QuestionRequest } from './dto/reqeust/question-request.dto';
+import { QuestionResponse } from './dto/response/question-response.dto';
 
 @Controller('api/users')
 @ApiTags('users')
@@ -104,5 +106,14 @@ export class UserController {
       UserConverter.toFindingPasswordResponse(isPasswordSended),
       GlobalResponseCode.OK,
     );
+  }
+
+  @Post('question')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: '사용자 문의사항' })
+  @ApiBearerAuth()
+  async question(@Body() request: QuestionRequest): Promise<BaseResponse<QuestionResponse>> {
+    const isQuestionSended = await this.userService.question(request);
+    return BaseResponse.of(UserConverter.toQuestionResponse(isQuestionSended));
   }
 }
