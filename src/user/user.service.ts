@@ -11,6 +11,8 @@ import { UserReport } from './entity/user-report.entity';
 import { User } from './entity/user.entity';
 import { UserResponseCode } from './exception/user-response-code';
 import { UserConverter } from './user.converter';
+import { QuestionRequest } from './dto/reqeust/question-request.dto';
+import { Question } from './entity/question.entity';
 
 @Injectable()
 export class UserService {
@@ -22,6 +24,8 @@ export class UserService {
     @InjectRepository(UserReport)
     private readonly userReportRepository: Repository<UserReport>,
     private readonly mailService: MailService,
+    @InjectRepository(Question)
+    private readonly questionRepository: Repository<Question>,
   ) {}
 
   async isUserExists(userId: number): Promise<boolean> {
@@ -86,5 +90,9 @@ export class UserService {
 
   async sendEmail(request: FindingPasswordRequest, password: string): Promise<void> {
     await this.mailService.sendMail(request.email, '[BookJam] 임시 비밀번호 안내', password);
+  }
+
+  async question(request: QuestionRequest) {
+    return await this.questionRepository.save(request);
   }
 }

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsByteLength, IsNotEmpty, IsString } from 'class-validator';
 
 export class QuestionRequest {
   @ApiProperty({ description: '문의 제목' })
@@ -14,5 +14,7 @@ export class QuestionRequest {
 
   @ApiProperty({ description: '문의 내용' })
   @IsString()
-  readonly content: string;
+  @IsNotEmpty({ message: '문의 내용은 필수입니다.' })
+  @IsByteLength(20, 10000, { message: '문의 내용은 10글자 이상이어야 합니다.' })
+  readonly contents: string;
 }

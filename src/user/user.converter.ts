@@ -11,6 +11,7 @@ import { UserReport } from './entity/user-report.entity';
 import { User } from './entity/user.entity';
 import { UserReportReason } from './enum/user-report-reason';
 import { QuestionResponse } from './dto/response/question-response.dto';
+import { Question } from './entity/question.entity';
 
 @Injectable()
 export class UserConverter implements OnModuleInit {
@@ -59,7 +60,9 @@ export class UserConverter implements OnModuleInit {
     return Builder(FindingPasswordResponse).isPasswordSended(isPasswordSended).build();
   }
 
-  public static toQuestionResponse(isQuestionSended: boolean): QuestionResponse {
-    return Builder(QuestionResponse).isSended(isQuestionSended).build();
+  public static toQuestionResponse(question: Question): QuestionResponse {
+    return Builder(QuestionResponse)
+      .isSended(question ? true : false)
+      .build();
   }
 }

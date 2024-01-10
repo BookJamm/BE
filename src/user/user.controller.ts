@@ -116,7 +116,7 @@ export class UserController {
   @ApiBearerAuth()
   @ApiCreatedResponse({ type: QuestionResponse, description: '문의 전송 성공' })
   async question(@Body() request: QuestionRequest): Promise<BaseResponse<QuestionResponse>> {
-    const isQuestionSended = await this.userService.question(request);
-    return BaseResponse.of(UserConverter.toQuestionResponse(isQuestionSended));
+    const question = await this.userService.question(request);
+    return BaseResponse.of(UserConverter.toQuestionResponse(question));
   }
 }
