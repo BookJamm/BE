@@ -105,4 +105,17 @@ export class UserController {
       GlobalResponseCode.OK,
     );
   }
+
+  @Post('withdrawal')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: '회원 탈퇴',
+    description: '현재 회원을 탈퇴시킵니다.',
+  })
+  @ApiOkResponse({ type: FindingPasswordResponse, description: '임시 비밀번호 전송 완료' })
+  @ApiBearerAuth()
+  async withdrawalUser(@ExtractPayload() userId: number) {
+    const userStatus = await this.userService.withdrawalUser(userId);
+    return BaseResponse.of(UserConverter.toWithdrawalUserResponse(userStatus));
+  }
 }
