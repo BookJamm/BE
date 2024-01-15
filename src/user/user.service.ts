@@ -87,4 +87,12 @@ export class UserService {
   async sendEmail(request: FindingPasswordRequest, password: string): Promise<void> {
     await this.mailService.sendMail(request.email, '[BookJam] 임시 비밀번호 안내', password);
   }
+
+  async withdrawalUser(userId: number): Promise<User> {
+    const user: User = await this.userRepository.findOneBy({ userId });
+    user.disabledAt = new Date();
+    await this.userRepository.update(userId, user);
+
+    return user;
+  }
 }
