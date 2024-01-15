@@ -34,7 +34,7 @@ import { PlaceExistsValidationPipe } from 'src/global/validation/pipe/place-exis
 import { PlaceNewsExistsValidationPipe } from 'src/global/validation/pipe/place-news-exists-validation.pipe';
 import { PlaceReviewExistsValidationPipe } from 'src/global/validation/pipe/place-review-exists-validation.pipe';
 import { SortConditionValidationPipe } from 'src/global/validation/pipe/sort-condition-validation.pipe';
-import { PlaceReviewResponse } from 'src/place-review/dto/place-review-response.dto';
+import { PlaceReviewResponse } from 'src/place-review/dto/response/place-review-response.dto';
 import { PlaceReviewService } from 'src/place-review/place-review.service';
 import { CreatePlaceReviewRequest } from './dto/request/create-place-review-request.dto';
 import { SortConditon } from './dto/request/sort-conditon';

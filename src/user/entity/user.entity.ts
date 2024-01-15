@@ -1,4 +1,5 @@
 import { BaseEntity } from 'src/global/base/base.entity';
+import { ContentsReport } from 'src/global/entity/contents-report.entity';
 import { PlaceReview } from 'src/place-review/entity/place-review.entity';
 import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { SocialType } from '../enum/social-type';
@@ -42,4 +43,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => UserReport, report => report.targetUser)
   targetedReports: UserReport[];
+
+  @OneToMany(() => ContentsReport, report => report.reporter)
+  contentsReports: ContentsReport[];
 }
