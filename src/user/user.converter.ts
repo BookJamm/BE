@@ -4,8 +4,11 @@ import { S3Service } from 'src/aws/s3/s3.service';
 import { FindingPasswordResponse } from './dto/finding-password-response.dto';
 import { ReportUserReqeust } from './dto/reqeust/report-user-request.dto';
 import { SignUpRequest } from './dto/reqeust/sign-up-request.dto';
+import { UpdateUserRequest } from './dto/reqeust/update-user-request.dto';
 import { ReportUserResponse } from './dto/response/report-user-response.dto';
 import { SignUpResponse } from './dto/response/sign-up-response.dto';
+import { UpdateUserProfileImageResponse } from './dto/response/update-user-profile-image-response.dto';
+import { UpdateUserResponse } from './dto/response/update-user-response.dto';
 import { Password } from './entity/password';
 import { UserReport } from './entity/user-report.entity';
 import { User } from './entity/user.entity';
@@ -28,9 +31,9 @@ export class UserConverter implements OnModuleInit {
       .username(request.username)
       .build();
 
-    if (profileImage) {
-      user.profileImage = await this.staticS3Service.uploadProfileImageFile(profileImage);
-    }
+    profileImage
+      ? (user.profileImage = await this.staticS3Service.uploadProfileImageFile(profileImage))
+      : '';
 
     return user;
   }
@@ -56,5 +59,25 @@ export class UserConverter implements OnModuleInit {
 
   public static toFindingPasswordResponse(isPasswordSended: boolean): FindingPasswordResponse {
     return Builder(FindingPasswordResponse).isPasswordSended(isPasswordSended).build();
+  }
+
+  public static toUpdateUser(user: User, reqeust: UpdateUserRequest) {
+    user.username = reqeust.username;
+
+    return user;
+  }
+
+  public static toUpdateUserResponse(user: User): UpdateUserResponse {
+    return Builder(UpdateUserResponse)
+      .updatedAt(user.updatedAt)
+      .updatedUsername(user.username)
+      .build();
+  }
+
+  public static toUpdateUserProfileImageResponse(user: User): UpdateUserProfileImageResponse {
+    return Builder(UpdateUserProfileImageResponse)
+      .updatedAt(user.updatedAt)
+      .updatedProfileImageUrl(user.profileImage)
+      .build();
   }
 }

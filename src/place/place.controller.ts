@@ -263,6 +263,7 @@ export class PlaceController {
           type: 'object',
           properties: {
             images: {
+              description: '업로드 할 이미지 (최대 3개)',
               type: 'array',
               items: {
                 type: 'string',

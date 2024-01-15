@@ -22,4 +22,14 @@ export const PlaceReviewResponseCode = {
     'REVIEW_004',
     '자신의 글을 신고할 수 없습니다.',
   ),
+  IMAGES_NUM_EXCEEDED: new ResponseCode(
+    HttpStatus.NOT_ACCEPTABLE,
+    'REVIEW_005',
+    '업로드 할 사진이 너무 많습니다.',
+  ),
+  IMAGE_NOT_FOUND: new ResponseCode(
+    HttpStatus.NOT_FOUND,
+    'REVIEW_006',
+    '해당 이미지를 찾을 수 없습니다.',
+  ),
 };
