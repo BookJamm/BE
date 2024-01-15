@@ -11,7 +11,6 @@ import { BaseException } from 'src/global/base/base-exception';
 import { Password } from 'src/user/entity/password';
 import { User } from 'src/user/entity/user.entity';
 import { SocialType } from 'src/user/enum/social-type';
-import { UserResponseCode } from 'src/user/exception/user-response-code';
 import { Repository } from 'typeorm';
 import { AppleOAuthResponse } from './dto/apple-oauth-response.dto';
 import { JwtResponse } from './dto/jwt-response.dto';
@@ -107,18 +106,15 @@ export class AuthService {
     return await this.userRepository.exist({ where: { email } });
   }
 
-  async reissueToken(userId: number, refreshToken: string) {
-    const user = await this.userRepository.findOneBy({ userId });
-    if (!user) {
-      throw BaseException.of(UserResponseCode.USER_NOT_FOUND);
-    }
+  async reissueToken(refreshToken: string) {
+    const user = await this.userRepository.findOneBy({ refreshToken });
 
-    if (user.refreshToken !== refreshToken) {
+    if (!user) {
       throw BaseException.of(AuthResponseCode.INVALID_TOKEN);
     }
 
-    const newAccessToken = await this.generateAccessToken(userId);
-    const newRefreshToken = await this.generateRefreshToken(userId);
+    const newAccessToken = await this.generateAccessToken(user.userId);
+    const newRefreshToken = await this.generateRefreshToken(user.userId);
 
     user.refreshToken = newRefreshToken;
     await this.userRepository.save(user);
