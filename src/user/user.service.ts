@@ -31,6 +31,15 @@ export class UserService {
     return this.userRepository.exist({ where: { userId } });
   }
 
+  async findUserById(userId: number): Promise<User> {
+    const user = await this.userRepository.findOneBy({ userId });
+    if (!user) {
+      throw BaseException.of(UserResponseCode.USER_NOT_FOUND);
+    }
+
+    return user;
+  }
+
   async create(request: SignUpRequest, profileImage: Express.Multer.File): Promise<User> {
     const newUser = this.userRepository.save(await UserConverter.toUser(request, profileImage));
 
