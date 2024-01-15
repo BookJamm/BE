@@ -1,11 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { S3Service } from 'src/aws/s3/s3.service';
 import { BaseException } from 'src/global/base/base-exception';
 import { MailService } from 'src/global/mail.service';
 import { Repository } from 'typeorm';
 import { FindingPasswordRequest } from './dto/finding-password-request.dto';
 import { ReportUserReqeust } from './dto/reqeust/report-user-request.dto';
 import { SignUpRequest } from './dto/reqeust/sign-up-request.dto';
+import { UpdateUserRequest } from './dto/reqeust/update-user-request.dto';
 import { Password } from './entity/password';
 import { UserReport } from './entity/user-report.entity';
 import { User } from './entity/user.entity';
@@ -22,6 +24,7 @@ export class UserService {
     @InjectRepository(UserReport)
     private readonly userReportRepository: Repository<UserReport>,
     private readonly mailService: MailService,
+    private readonly s3Service: S3Service,
   ) {}
 
   async isUserExists(userId: number): Promise<boolean> {
@@ -86,5 +89,25 @@ export class UserService {
 
   async sendEmail(request: FindingPasswordRequest, password: string): Promise<void> {
     await this.mailService.sendMail(request.email, '[BookJam] 임시 비밀번호 안내', password);
+  }
+
+  async updateUser(userId: number, request: UpdateUserRequest): Promise<User> {
+    const user = await this.userRepository.findOneBy({ userId });
+
+    const updatedUser = UserConverter.toUpdateUser(user, request);
+
+    return this.userRepository.save(updatedUser);
+  }
+
+  async updateUserProfileImage(userId: number, image: Express.Multer.File) {
+    const user = await this.userRepository.findOneBy({ userId });
+
+    if (user.profileImage !== '') {
+      await this.s3Service.deleteFileByUrl(user.profileImage);
+    }
+
+    user.profileImage = image ? await this.s3Service.uploadProfileImageFile(image) : '';
+
+    return await this.userRepository.save(user);
   }
 }

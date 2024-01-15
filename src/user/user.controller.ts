@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Param,
+  Patch,
   Post,
   UploadedFile,
   UseGuards,
@@ -28,8 +29,11 @@ import { FindingPasswordRequest } from './dto/finding-password-request.dto';
 import { FindingPasswordResponse } from './dto/finding-password-response.dto';
 import { ReportUserReqeust } from './dto/reqeust/report-user-request.dto';
 import { SignUpRequest } from './dto/reqeust/sign-up-request.dto';
+import { UpdateUserRequest } from './dto/reqeust/update-user-request.dto';
 import { ReportUserResponse } from './dto/response/report-user-response.dto';
 import { SignUpResponse } from './dto/response/sign-up-response.dto';
+import { UpdateUserProfileImageResponse } from './dto/response/update-user-profile-image-response.dto';
+import { UpdateUserResponse } from './dto/response/update-user-response.dto';
 import { UserConverter } from './user.converter';
 import { UserService } from './user.service';
 
@@ -104,5 +108,56 @@ export class UserController {
       UserConverter.toFindingPasswordResponse(isPasswordSended),
       GlobalResponseCode.OK,
     );
+  }
+
+  @Patch('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: '내 정보 수정 API',
+  })
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: UpdateUserResponse })
+  async updateUser(
+    @ExtractPayload() userId: number,
+    @Body() request: UpdateUserRequest,
+  ): Promise<BaseResponse<UpdateUserResponse>> {
+    const updatedUser = await this.userService.updateUser(userId, request);
+
+    return BaseResponse.of(UserConverter.toUpdateUserResponse(updatedUser));
+  }
+
+  @Patch('me/profile-image')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiOperation({
+    summary: '내 프로필 이미지 수정 API',
+    description: '프로필 이미지를 변경합니다. ⚠️ multipart/form-data로 보낼 것!',
+  })
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      allOf: [
+        {
+          type: 'object',
+          properties: {
+            image: {
+              description: '프로필 이미지, 없다면 기본 이미지로 변경합니다.',
+              type: 'string',
+              format: 'binary',
+            },
+          },
+        },
+      ],
+    },
+  })
+  @ApiOkResponse({ type: UpdateUserProfileImageResponse })
+  async updateUserProfileImage(
+    @ExtractPayload() userId: number,
+    @UploadedFile() profileImage: Express.Multer.File,
+  ) {
+    const updatedUser = await this.userService.updateUserProfileImage(userId, profileImage);
+
+    return BaseResponse.of(UserConverter.toUpdateUserProfileImageResponse(updatedUser));
   }
 }
