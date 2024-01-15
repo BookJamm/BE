@@ -1,7 +1,6 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeaders, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BaseResponse } from 'src/global/base/base-response';
-import { ExtractPayload } from 'src/global/decorator/extract-payload.decorator';
 import { ExtractToken } from 'src/global/decorator/extract-token.decorator';
 import { AuthService } from './auth.service';
 import { AppleOAuthRequest } from './dto/apple-oauth-request.dto';
@@ -12,7 +11,6 @@ import { JwtResponse } from './dto/jwt-response.dto';
 import { KakaoOAuthRequest } from './dto/kakao-oauth-request.dto';
 import { KakaoOAuthResponse } from './dto/kakao-oauth-response.dto';
 import { LoginRequest } from './dto/login-request.dto';
-import { JwtAuthGuard } from './guard/auth.guard';
 
 @Controller('api/auth')
 @ApiTags('auth')
@@ -31,7 +29,6 @@ export class AuthController {
   }
 
   @Get('reissue')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Access Token 만료시 재발급',
     description: 'Access Token과 Refresh Token을 재발급한다.',
@@ -39,11 +36,8 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiHeaders([{ name: 'Authorization', description: 'Refresh Token' }])
   @ApiOkResponse({ type: JwtResponse, description: '재발급 성공' })
-  async reissueToken(
-    @ExtractPayload() userId: number,
-    @ExtractToken() refreshToken: string,
-  ): Promise<BaseResponse<JwtResponse>> {
-    return BaseResponse.of(await this.authService.reissueToken(userId, refreshToken));
+  async reissueToken(@ExtractToken() refreshToken: string): Promise<BaseResponse<JwtResponse>> {
+    return BaseResponse.of(await this.authService.reissueToken(refreshToken));
   }
 
   @Post('email-check')
